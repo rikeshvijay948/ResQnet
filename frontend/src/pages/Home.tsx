@@ -5,12 +5,14 @@ import Footer from "../components/Footer/Footer";
 
 function Home() {
   return (
-    <>
+    <div className="min-h-screen bg-[#f5f5f7] flex flex-col justify-between">
       <Navbar />
-      <Hero />
-      <Features />
+      <main className="flex-1">
+        <Hero />
+        <Features />
+      </main>
       <Footer />
-    </>
+    </div>
   );
 }
 
