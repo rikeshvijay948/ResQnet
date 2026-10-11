@@ -6,6 +6,7 @@ import {
   apiAIClassifyText,
   apiGetReports,
   apiUploadImage,
+  apiCreateReport,
   getFullImageUrl,
 } from "../services/api";
 import { getDistanceKm } from "../utils/geo";
@@ -31,7 +32,7 @@ import {
   FaRedo,
 } from "react-icons/fa";
 
-function ReportEmergency() {
+export default function ReportEmergency() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -149,7 +150,6 @@ function ReportEmergency() {
 
       let stream: MediaStream;
       try {
-        // Try requested facing mode first
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: facing,
@@ -160,7 +160,6 @@ function ReportEmergency() {
         });
       } catch (modeErr) {
         console.warn("FacingMode constraint failed, falling back to standard video query:", modeErr);
-        // Fallback for laptop / desktop webcams
         stream = await navigator.mediaDevices.getUserMedia({
           video: true,
           audio: false,
@@ -197,7 +196,6 @@ function ReportEmergency() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Flip horizontally if user-facing front camera
     if (cameraFacingMode === "user") {
       ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
@@ -400,30 +398,28 @@ function ReportEmergency() {
       severity,
       peopleAffected: Number(peopleAffected),
       description,
-      userId: user?._id || null,
+      userId: user?._id || undefined, // Fixed: undefined instead of null to match TypeScript interfaces
       imageUrl: uploadedImageUrl,
     };
 
     try {
-      const response = await fetch("http://localhost:5000/report", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(user ? { Authorization: `Bearer ${localStorage.getItem("resqnet_token")}` } : {}),
-        },
-        body: JSON.stringify(reportData),
-      });
+      const response = await apiCreateReport(reportData);
 
-      const data = await response.json();
-
-      if (data.success && data.report) {
-        setSubmittedReport(data.report);
+      if (response.success && response.report) {
+        setSubmittedReport(response.report);
       } else {
-        alert("❌ Failed to submit emergency report: " + (data.message || "Unknown error"));
+        alert(
+          "Failed to submit emergency report: " +
+            (response.message || "Unknown error")
+        );
       }
     } catch (error) {
-      console.error(error);
-      alert("❌ Could not connect to the ResQNet dispatch server.");
+      console.error("Emergency report submission error:", error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Could not connect to the ResQNet backend."
+      );
     } finally {
       setSubmitting(false);
     }
@@ -816,168 +812,112 @@ function ReportEmergency() {
                         value={peopleAffected}
                         onChange={(e) => setPeopleAffected(e.target.value)}
                         required
-                        className="w-full pl-9 pr-4 py-3 bg-gray-50/70 border border-black/[0.08] rounded-2xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
+                        className="w-full pl-9 pr-4 py-3 bg-gray-50/70 border border-black/[0.08] rounded-2xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
                       />
                     </div>
                   </div>
                 </div>
-
-                {/* SECTION 4: CAMERA CAPTURE & IMAGE UPLOAD */}
-                <div className="space-y-2">
-                  <label className="block text-xs font-semibold text-gray-700 mb-1 ml-1">
-                    Disaster Photo Evidence (Live Camera or Upload)
-                  </label>
-
-                  {imagePreview ? (
-                    <div className="relative rounded-2xl overflow-hidden border border-black/[0.08] bg-gray-50 p-2.5 flex items-center gap-4">
-                      <img
-                        src={imagePreview}
-                        alt="Captured Scene"
-                        className="w-20 h-20 object-cover rounded-xl border border-black/[0.06] shadow-xs"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-bold text-gray-900 truncate">
-                          {imageFile?.name || "Incident-Photo.jpg"}
-                        </p>
-                        <p className="text-[11px] text-gray-500 mt-0.5">
-                          {imageFile ? `${(imageFile.size / (1024 * 1024)).toFixed(2)} MB` : "Photo Ready"}
-                        </p>
-                        <span className="text-[10px] text-emerald-600 font-semibold mt-1 inline-flex items-center gap-1">
-                          <FaCheckCircle className="text-[10px]" />
-                          Ready for dispatch attachment
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1.5 mr-1">
-                        <button
-                          type="button"
-                          onClick={() => startCamera("user")}
-                          className="p-2.5 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition"
-                          title="Retake Photo"
-                        >
-                          <FaRedo className="text-xs" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={removeImage}
-                          className="p-2.5 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 transition"
-                          title="Remove Photo"
-                        >
-                          <FaTrash className="text-xs" />
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {/* 1. LIVE CAMERA BUTTON */}
-                      <button
-                        type="button"
-                        onClick={() => startCamera("user")}
-                        className="flex flex-col items-center justify-center gap-2 p-5 bg-blue-50/60 hover:bg-blue-50 border-2 border-dashed border-blue-200 hover:border-blue-400 rounded-2xl cursor-pointer transition text-center group"
-                      >
-                        <div className="w-11 h-11 rounded-full bg-blue-600 text-white flex items-center justify-center text-lg shadow-sm shadow-blue-500/30 group-hover:scale-105 transition">
-                          <FaCamera />
-                        </div>
-                        <div>
-                          <span className="text-xs font-bold text-blue-900 block">
-                            📸 Open Live Camera
-                          </span>
-                          <span className="text-[11px] text-blue-600">
-                            Snap instant disaster photo
-                          </span>
-                        </div>
-                      </button>
-
-                      {/* 2. FILE CHOOSER BUTTON */}
-                      <label className="flex flex-col items-center justify-center gap-2 p-5 bg-gray-50/70 hover:bg-gray-100/70 border-2 border-dashed border-black/[0.08] hover:border-black/20 rounded-2xl cursor-pointer transition text-center group">
-                        <div className="w-11 h-11 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center text-lg group-hover:scale-105 transition">
-                          <FaImage />
-                        </div>
-                        <div>
-                          <span className="text-xs font-bold text-gray-900 block">
-                            Upload File / Gallery
-                          </span>
-                          <span className="text-[11px] text-gray-500">
-                            JPG, PNG, WEBP up to 10MB
-                          </span>
-                        </div>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageChange}
-                          className="hidden"
-                        />
-                      </label>
-                    </div>
-                  )}
-                </div>
               </div>
 
-              {/* Submit CTA */}
-              <button
-                type="submit"
-                disabled={submitting || uploadingImage}
-                className="w-full py-4 px-6 rounded-2xl bg-red-600 hover:bg-red-700 active:scale-[0.99] text-white font-bold text-base shadow-lg shadow-red-500/25 transition-all duration-150 flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                {uploadingImage
-                  ? "Uploading Disaster Photo..."
-                  : submitting
-                  ? "Broadcasting Emergency..."
-                  : "🚨 Dispatch Emergency Report"}
-              </button>
+              {/* SECTION 4: PHOTO EVIDENCE & CAMERA ACCESS */}
+              <div className="space-y-3 pt-2">
+                <h2 className="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-2">
+                  <FaImage className="text-[11px]" />
+                  <span>Attach Image Evidence (Optional)</span>
+                </h2>
+
+                {imagePreview ? (
+                  <div className="relative max-w-xs rounded-2xl overflow-hidden border border-black/[0.1] group">
+                    <img
+                      src={imagePreview}
+                      alt="Incident upload preview"
+                      className="w-full h-44 object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={removeImage}
+                      className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition shadow-md"
+                    >
+                      <FaTrash className="text-xs" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-2xl cursor-pointer hover:border-blue-500 hover:bg-blue-50/50 transition">
+                      <FaImage className="text-xl text-gray-400 mb-1" />
+                      <span className="text-xs font-semibold text-gray-700">Upload Photo File</span>
+                      <span className="text-[10px] text-gray-400">JPG, PNG up to 10MB</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="hidden"
+                      />
+                    </label>
+
+                    <button
+                      type="button"
+                      onClick={() => startCamera("user")}
+                      className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-2xl hover:border-emerald-500 hover:bg-emerald-50/50 transition text-gray-700"
+                    >
+                      <FaCamera className="text-xl text-gray-400 mb-1" />
+                      <span className="text-xs font-semibold text-gray-700">Capture Live Photo</span>
+                      <span className="text-[10px] text-gray-400">Use device camera</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* SUBMIT BUTTON */}
+              <div className="pt-4">
+                <button
+                  type="submit"
+                  disabled={submitting || uploadingImage}
+                  className="w-full py-4 px-6 rounded-2xl bg-red-600 hover:bg-red-700 active:scale-[0.99] text-white font-bold text-base shadow-lg shadow-red-600/25 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {submitting ? (
+                    <>
+                      <FaSyncAlt className="animate-spin text-sm" />
+                      <span>Dispatching Emergency Alert...</span>
+                    </>
+                  ) : (
+                    <span>Submit & Broadcast Emergency Alert</span>
+                  )}
+                </button>
+              </div>
             </form>
           </div>
         )}
-      </main>
 
-      {/* =====================================================
-          APPLE-INSPIRED LIVE CAMERA VIEWFINDER MODAL
-          ===================================================== */}
-      {isCameraOpen && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-150">
-          <div className="bg-gray-900 rounded-3xl overflow-hidden shadow-2xl w-full max-w-md border border-white/10 flex flex-col">
-            {/* Camera Header */}
-            <div className="p-4 bg-gray-900/90 text-white flex items-center justify-between border-b border-white/10">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
-                <span className="text-xs font-bold uppercase tracking-wider text-gray-300">
-                  Live Viewfinder
-                </span>
+        {/* LIVE CAMERA MODAL OVERLAY */}
+        {isCameraOpen && (
+          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+            <div className="bg-gray-900 rounded-3xl max-w-lg w-full p-5 text-white shadow-2xl relative border border-white/10">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-bold flex items-center gap-2">
+                  <FaCamera className="text-emerald-400" />
+                  <span>Live Camera Capture</span>
+                </h3>
+                <button
+                  onClick={closeCameraModal}
+                  className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition"
+                >
+                  <FaTimes className="text-sm" />
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={closeCameraModal}
-                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white transition"
-              >
-                <FaTimes className="text-sm" />
-              </button>
-            </div>
 
-            {/* Video Stream Container */}
-            <div className="relative aspect-[4/3] bg-black flex items-center justify-center overflow-hidden min-h-[280px]">
-              {cameraLoading ? (
-                <div className="text-center text-white">
-                  <div className="w-8 h-8 border-3 border-white border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                  <span className="text-xs text-gray-300">Initializing camera sensor...</span>
-                </div>
-              ) : cameraError ? (
-                <div className="p-6 text-center text-white space-y-3">
-                  <FaExclamationTriangle className="text-3xl text-amber-400 mx-auto" />
-                  <p className="text-xs text-gray-300">{cameraError}</p>
-                  <label className="inline-block px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs cursor-pointer transition">
-                    Upload from Gallery Instead
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        handleImageChange(e);
-                        closeCameraModal();
-                      }}
-                      className="hidden"
-                    />
-                  </label>
+              {cameraError ? (
+                <div className="p-4 bg-red-900/50 border border-red-500/50 rounded-2xl text-xs text-red-200 my-6">
+                  {cameraError}
                 </div>
               ) : (
-                <div className="w-full h-full relative flex items-center justify-center bg-black">
+                <div className="relative bg-black rounded-2xl overflow-hidden aspect-video flex items-center justify-center mb-5 border border-white/10">
+                  {cameraLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/60 z-10 text-xs text-gray-300 gap-2">
+                      <FaSyncAlt className="animate-spin" />
+                      <span>Initializing Camera...</span>
+                    </div>
+                  )}
                   <video
                     ref={videoRef}
                     autoPlay
@@ -986,66 +926,35 @@ function ReportEmergency() {
                     className={`w-full h-full object-cover ${
                       cameraFacingMode === "user" ? "scale-x-[-1]" : ""
                     }`}
-                    style={{ display: "block", minHeight: "280px" }}
                   />
-                  {/* Framing Grid Overlay */}
-                  <div className="absolute inset-0 pointer-events-none grid grid-cols-3 grid-rows-3 border border-white/10">
-                    <div className="border-r border-b border-white/10"></div>
-                    <div className="border-r border-b border-white/10"></div>
-                    <div className="border-b border-white/10"></div>
-                    <div className="border-r border-b border-white/10"></div>
-                    <div className="border-r border-b border-white/10"></div>
-                    <div className="border-b border-white/10"></div>
-                    <div className="border-r border-white/10"></div>
-                    <div className="border-r border-white/10"></div>
-                    <div></div>
-                  </div>
                 </div>
               )}
-            </div>
 
-            {/* Camera Controls Bar */}
-            <div className="p-5 bg-gray-950 flex items-center justify-between">
-              {/* Switch Camera Button */}
-              <button
-                type="button"
-                onClick={switchCamera}
-                disabled={cameraLoading || !!cameraError}
-                className="p-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white text-sm transition disabled:opacity-30"
-                title="Flip Camera"
-              >
-                <FaSyncAlt />
-              </button>
+              <div className="flex items-center justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={switchCamera}
+                  disabled={!!cameraError}
+                  className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold flex items-center gap-2 transition disabled:opacity-50"
+                >
+                  <FaRedo className="text-xs" />
+                  <span>Flip Camera</span>
+                </button>
 
-              {/* Shutter Capture Button */}
-              <button
-                type="button"
-                onClick={capturePhoto}
-                disabled={cameraLoading || !!cameraError}
-                className="w-16 h-16 rounded-full border-4 border-white flex items-center justify-center p-1 group transition active:scale-90 disabled:opacity-30"
-                title="Capture Photo"
-              >
-                <div className="w-full h-full bg-white rounded-full group-hover:bg-red-500 transition"></div>
-              </button>
-
-              {/* Cancel Button */}
-              <button
-                type="button"
-                onClick={closeCameraModal}
-                className="p-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition"
-              >
-                Cancel
-              </button>
+                <button
+                  type="button"
+                  onClick={capturePhoto}
+                  disabled={!!cameraError || cameraLoading}
+                  className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white flex items-center gap-2 shadow-md transition disabled:opacity-50"
+                >
+                  <FaCamera className="text-xs" />
+                  <span>Capture Photo</span>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-
-      <footer className="py-6 text-center text-xs text-gray-400">
-        © 2026 ResQNet. Professional Disaster Coordination Platform.
-      </footer>
+        )}
+      </main>
     </div>
   );
 }
-
-export default ReportEmergency;

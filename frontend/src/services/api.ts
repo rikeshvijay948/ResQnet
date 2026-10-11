@@ -1,3 +1,4 @@
+
 import type {
   AIClassifyResponse,
   AIIntelligenceResponse,
@@ -16,8 +17,11 @@ import type {
   VolunteersResponse,
 } from "../types";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000";
+// Production uses VITE_API_URL from Vercel.
+// Local development falls back to localhost:5000.
+const API_BASE_URL = (
+  import.meta.env.VITE_API_URL || "http://localhost:5000"
+).replace(/\/+$/, "");
 
 export const getAuthToken = (): string | null => {
   return localStorage.getItem("resqnet_token");
@@ -33,11 +37,11 @@ export const setAuthToken = (token: string | null) => {
 
 export const getFullImageUrl = (path?: string): string => {
   if (!path) return "";
-  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  if (/^https?:\/\//i.test(path)) return path;
   return `${API_BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
 };
 
-const getHeaders = (includeAuth: boolean = true) => {
+const getHeaders = (includeAuth = true): Record<string, string> => {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
@@ -45,55 +49,76 @@ const getHeaders = (includeAuth: boolean = true) => {
   if (includeAuth) {
     const token = getAuthToken();
     if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
+      headers.Authorization = `Bearer ${token}`;
     }
   }
 
   return headers;
 };
 
-// ==========================================
-// AUTH APIS
-// ==========================================
+// Shared request helper.
+// Keeps existing endpoints and returns parsed JSON.
+const request = async <T>(
+  path: string,
+  options: RequestInit = {}
+): Promise<T> => {
+  let response: Response;
 
-export const apiLogin = async (
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, options);
+  } catch {
+    throw new Error(
+      `Cannot connect to the ResQNet backend at ${API_BASE_URL}. Check the backend deployment and VITE_API_URL.`
+    );
+  }
+
+  const contentType = response.headers.get("content-type") || "";
+  const data = contentType.includes("application/json")
+    ? await response.json()
+    : await response.text();
+
+  if (!response.ok) {
+    const message =
+      typeof data === "object" && data !== null && "message" in data
+        ? String(data.message)
+        : `Request failed with status ${response.status}`;
+
+    throw new Error(message);
+  }
+
+  return data as T;
+};
+
+// AUTH APIS
+
+export const apiLogin = (
   email: string,
   password: string
-): Promise<AuthResponse> => {
-  const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
+): Promise<AuthResponse> =>
+  request("/api/auth/login", {
     method: "POST",
     headers: getHeaders(false),
     body: JSON.stringify({ email, password }),
   });
-  return res.json();
-};
 
-export const apiRegister = async (data: {
+export const apiRegister = (data: {
   name: string;
   email: string;
   password: string;
   phone?: string;
   role?: string;
   skills?: string[];
-}): Promise<AuthResponse> => {
-  const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
+}): Promise<AuthResponse> =>
+  request("/api/auth/register", {
     method: "POST",
     headers: getHeaders(false),
     body: JSON.stringify(data),
   });
-  return res.json();
-};
 
-export const apiGetMe = async (): Promise<AuthResponse> => {
-  const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
-    headers: getHeaders(true),
-  });
-  return res.json();
-};
+export const apiGetMe = (): Promise<AuthResponse> =>
+  request("/api/auth/me", { headers: getHeaders() });
 
-// ==========================================
-// FILE UPLOAD (Image / Evidence)
-// ==========================================
+// FILE UPLOAD
 
 export const apiUploadImage = async (
   file: File
@@ -103,230 +128,167 @@ export const apiUploadImage = async (
 
   const token = getAuthToken();
   const headers: Record<string, string> = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
+  if (token) headers.Authorization = `Bearer ${token}`;
 
-  const res = await fetch(`${API_BASE_URL}/api/upload`, {
+  return request("/api/upload", {
     method: "POST",
     headers,
     body: formData,
   });
-  return res.json();
 };
 
-// ==========================================
-// NOTIFICATIONS APIS
-// ==========================================
+// NOTIFICATIONS
 
-export const apiGetNotifications = async (): Promise<NotificationsResponse> => {
-  const res = await fetch(`${API_BASE_URL}/api/notifications`, {
-    headers: getHeaders(true),
-  });
-  return res.json();
-};
+export const apiGetNotifications = (): Promise<NotificationsResponse> =>
+  request("/api/notifications", { headers: getHeaders() });
 
-export const apiMarkNotificationRead = async (
+export const apiMarkNotificationRead = (
   id: string
-): Promise<{ success: boolean }> => {
-  const res = await fetch(`${API_BASE_URL}/api/notifications/${id}/read`, {
+): Promise<{ success: boolean }> =>
+  request(`/api/notifications/${id}/read`, {
     method: "PUT",
-    headers: getHeaders(true),
+    headers: getHeaders(),
   });
-  return res.json();
-};
 
-export const apiMarkAllNotificationsRead = async (): Promise<{
+export const apiMarkAllNotificationsRead = (): Promise<{
   success: boolean;
-}> => {
-  const res = await fetch(`${API_BASE_URL}/api/notifications/read-all`, {
+}> =>
+  request("/api/notifications/read-all", {
     method: "PUT",
-    headers: getHeaders(true),
+    headers: getHeaders(),
   });
-  return res.json();
-};
 
-// ==========================================
-// EMERGENCY REPORT APIS
-// ==========================================
+// EMERGENCY REPORTS
 
-export const apiGetReports = async (): Promise<ReportsResponse> => {
-  const res = await fetch(`${API_BASE_URL}/reports`);
-  return res.json();
-};
+export const apiGetReports = (): Promise<ReportsResponse> =>
+  request("/reports");
 
-export const apiGetReportById = async (
-  id: string
-): Promise<SingleReportResponse> => {
-  const res = await fetch(`${API_BASE_URL}/reports/${id}`);
-  return res.json();
-};
+export const apiGetReportById = (id: string): Promise<SingleReportResponse> =>
+  request(`/reports/${id}`);
 
-export const apiGetMyReports = async (): Promise<ReportsResponse> => {
-  const res = await fetch(`${API_BASE_URL}/reports/my`, {
-    headers: getHeaders(true),
-  });
-  return res.json();
-};
+export const apiGetMyReports = (): Promise<ReportsResponse> =>
+  request("/reports/my", { headers: getHeaders() });
 
-export const apiGetAssignedReports = async (): Promise<ReportsResponse> => {
-  const res = await fetch(`${API_BASE_URL}/reports/assigned`, {
-    headers: getHeaders(true),
-  });
-  return res.json();
-};
+export const apiGetAssignedReports = (): Promise<ReportsResponse> =>
+  request("/reports/assigned", { headers: getHeaders() });
 
-export const apiCreateReport = async (
+export const apiCreateReport = (
   reportData: Partial<Report>
-): Promise<SingleReportResponse> => {
-  const res = await fetch(`${API_BASE_URL}/report`, {
+): Promise<SingleReportResponse> =>
+  request("/report", {
     method: "POST",
-    headers: getHeaders(true),
+    headers: getHeaders(),
     body: JSON.stringify(reportData),
   });
-  return res.json();
-};
 
-export const apiUpdateReportStatus = async (
+export const apiUpdateReportStatus = (
   reportId: string,
   status: string
-): Promise<SingleReportResponse> => {
-  const res = await fetch(`${API_BASE_URL}/reports/${reportId}/status`, {
+): Promise<SingleReportResponse> =>
+  request(`/reports/${reportId}/status`, {
     method: "PUT",
-    headers: getHeaders(true),
+    headers: getHeaders(),
     body: JSON.stringify({ status }),
   });
-  return res.json();
-};
 
-export const apiAssignReport = async (
+export const apiAssignReport = (
   reportId: string,
   volunteerId: string,
   assignedTeam?: string
-): Promise<SingleReportResponse> => {
-  const res = await fetch(`${API_BASE_URL}/reports/${reportId}/assign`, {
+): Promise<SingleReportResponse> =>
+  request(`/reports/${reportId}/assign`, {
     method: "PUT",
-    headers: getHeaders(true),
+    headers: getHeaders(),
     body: JSON.stringify({ volunteerId, assignedTeam }),
   });
-  return res.json();
-};
 
-// ===============================
-// VOLUNTEER & PROXIMITY APIS
-// ===============================
+// VOLUNTEERS & RESPONDERS
 
-export const apiGetVolunteers = async (): Promise<VolunteersResponse> => {
-  const res = await fetch(`${API_BASE_URL}/api/volunteers`, {
-    headers: getHeaders(true),
-  });
-  return res.json();
-};
+export const apiGetVolunteers = (): Promise<VolunteersResponse> =>
+  request("/api/volunteers", { headers: getHeaders() });
 
-export const apiGetNearbyResponders = async (
+export const apiGetNearbyResponders = (
   reportId: string
-): Promise<NearbyRespondersResponse> => {
-  const res = await fetch(
-    `${API_BASE_URL}/reports/${reportId}/nearby-responders`
-  );
-  return res.json();
-};
+): Promise<NearbyRespondersResponse> =>
+  request(`/reports/${reportId}/nearby-responders`);
 
-export const apiUpdateVolunteerAvailability = async (
+export const apiUpdateVolunteerAvailability = (
   availability: string,
-  currentLocation?: { latitude: number; longitude: number; address?: string }
-): Promise<{ success: boolean; user: User }> => {
-  const res = await fetch(`${API_BASE_URL}/api/volunteers/availability`, {
+  currentLocation?: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  }
+): Promise<{ success: boolean; user: User }> =>
+  request("/api/volunteers/availability", {
     method: "PUT",
-    headers: getHeaders(true),
+    headers: getHeaders(),
     body: JSON.stringify({ availability, currentLocation }),
   });
-  return res.json();
-};
 
-// ===============================
-// PHASE 3: ANALYTICS APIS
-// ===============================
+// ANALYTICS
 
-export const apiGetAnalytics = async (): Promise<AnalyticsResponse> => {
-  const res = await fetch(`${API_BASE_URL}/api/analytics`);
-  return res.json();
-};
+export const apiGetAnalytics = (): Promise<AnalyticsResponse> =>
+  request("/api/analytics");
 
-// ===============================
-// PHASE 3: RESOURCE LOGISTICS APIS
-// ===============================
+// RESOURCE LOGISTICS
 
-export const apiGetResources = async (): Promise<ResourcesResponse> => {
-  const res = await fetch(`${API_BASE_URL}/api/resources`);
-  return res.json();
-};
+export const apiGetResources = (): Promise<ResourcesResponse> =>
+  request("/api/resources");
 
-export const apiAddResource = async (
+export const apiAddResource = (
   data: Partial<Resource>
-): Promise<{ success: boolean; resource?: Resource; message?: string }> => {
-  const res = await fetch(`${API_BASE_URL}/api/resources`, {
+): Promise<{ success: boolean; resource?: Resource; message?: string }> =>
+  request("/api/resources", {
     method: "POST",
-    headers: getHeaders(true),
+    headers: getHeaders(),
     body: JSON.stringify(data),
   });
-  return res.json();
-};
 
-export const apiAllocateResource = async (
+export const apiAllocateResource = (
   resourceId: string,
-  data: { reportId?: string; incidentName?: string; amount: number; notes?: string }
-): Promise<{ success: boolean; resource?: Resource; message?: string }> => {
-  const res = await fetch(`${API_BASE_URL}/api/resources/${resourceId}/allocate`, {
+  data: {
+    reportId?: string;
+    incidentName?: string;
+    amount: number;
+    notes?: string;
+  }
+): Promise<{ success: boolean; resource?: Resource; message?: string }> =>
+  request(`/api/resources/${resourceId}/allocate`, {
     method: "PUT",
-    headers: getHeaders(true),
+    headers: getHeaders(),
     body: JSON.stringify(data),
   });
-  return res.json();
-};
 
-// ===============================
-// PHASE 3: FACILITIES & SHELTERS APIS
-// ===============================
+// FACILITIES & SHELTERS
 
-export const apiGetFacilities = async (): Promise<FacilitiesResponse> => {
-  const res = await fetch(`${API_BASE_URL}/api/facilities`);
-  return res.json();
-};
+export const apiGetFacilities = (): Promise<FacilitiesResponse> =>
+  request("/api/facilities");
 
-export const apiAddFacility = async (
+export const apiAddFacility = (
   data: Partial<Facility>
-): Promise<{ success: boolean; facility?: Facility; message?: string }> => {
-  const res = await fetch(`${API_BASE_URL}/api/facilities`, {
+): Promise<{ success: boolean; facility?: Facility; message?: string }> =>
+  request("/api/facilities", {
     method: "POST",
-    headers: getHeaders(true),
+    headers: getHeaders(),
     body: JSON.stringify(data),
   });
-  return res.json();
-};
 
-// ===============================
-// PHASE 4: AI INTELLIGENCE APIS
-// ===============================
+// AI INTELLIGENCE
 
-export const apiAIClassifyText = async (
+export const apiAIClassifyText = (
   text: string,
   peopleAffected?: number
-): Promise<AIClassifyResponse> => {
-  const res = await fetch(`${API_BASE_URL}/api/ai/classify`, {
+): Promise<AIClassifyResponse> =>
+  request("/api/ai/classify", {
     method: "POST",
     headers: getHeaders(false),
     body: JSON.stringify({ text, peopleAffected }),
   });
-  return res.json();
-};
 
-export const apiGetReportAIIntelligence = async (
+export const apiGetReportAIIntelligence = (
   reportId: string
-): Promise<AIIntelligenceResponse> => {
-  const res = await fetch(
-    `${API_BASE_URL}/reports/${reportId}/ai-intelligence`,
-    {
-      headers: getHeaders(true),
-    }
-  );
-  return res.json();
-};
+): Promise<AIIntelligenceResponse> =>
+  request(`/reports/${reportId}/ai-intelligence`, {
+    headers: getHeaders(),
+  });
