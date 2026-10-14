@@ -840,6 +840,14 @@ const optionalAuthMiddleware = async (req, res, next) => {
 // ===============================
 
 
+
+ // Test & Health
+ // ===============================
+
+app.get("/", (req, res) => {
+  res.send("🚀 ResQNet Backend is Running!");
+});
+
 app.get("/api/health", (req, res) => {
   res.status(200).json({
     success: true,
