@@ -1,13 +1,20 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "ResQNet disaster management backend API server with AI intelligence and geospatial coordination",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "node --watch index.js",
+    "test": "node -e \"console.log('No unit tests specified')\""
   },
-  "keywords": [],
+  "keywords": [
+    "disaster-management",
+    "emergency-response",
+    "express",
+    "nodejs",
+    "ai-triage"
+  ],
   "author": "",
   "license": "ISC",
   "type": "commonjs",

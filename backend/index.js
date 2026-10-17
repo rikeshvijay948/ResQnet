@@ -853,10 +853,15 @@ app.get("/api/health", (req, res) => {
     success: true,
     message: "ResQNet API is healthy",
     backend: "running",
-    database: mongoose.connection.readyState === 1
-      ? "connected"
-      : "disconnected",
-    timestamp: new Date().toISOString()
+    database:
+      mongoose.connection.readyState === 1
+        ? "connected"
+        : isAtlasConnected
+        ? "connected"
+        : "resilient_memory_store",
+    environment: process.env.NODE_ENV || "development",
+    uptimeSeconds: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString(),
   });
 });
 
