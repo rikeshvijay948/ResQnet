@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/Common/ProtectedRoute";
 import ErrorBoundary from "./components/Common/ErrorBoundary";
+import NetworkStatusBanner from "./components/Common/NetworkStatusBanner";
 
 import Home from "./pages/Home";
 import ReportEmergency from "./pages/ReportEmergency";
@@ -19,6 +20,7 @@ import NotFound from "./pages/NotFound";
 function App() {
   return (
     <ErrorBoundary>
+      <NetworkStatusBanner />
       <BrowserRouter>
         <AuthProvider>
           <Routes>
