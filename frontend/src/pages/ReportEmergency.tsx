@@ -545,6 +545,17 @@ export default function ReportEmergency() {
               <p className="text-sm text-gray-500 mt-1.5">
                 Submit disaster details to alert nearby certified rescue teams and dispatchers immediately.
               </p>
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <span className="text-xs text-gray-500 font-medium">Need immediate life-saving steps?</span>
+                <button
+                  type="button"
+                  onClick={() => window.dispatchEvent(new CustomEvent("open-disaster-guide"))}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs border border-blue-200/60 transition active:scale-95"
+                >
+                  <span>🩺 Open First-Aid & Survival Protocols</span>
+                  <span>↗</span>
+                </button>
+              </div>
             </div>
 
             {/* LIVE DUPLICATE WARNING BANNER */}

@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import CriticalAlertBanner from "../Common/CriticalAlertBanner";
 import EmergencyHotlinesModal from "../Common/EmergencyHotlinesModal";
+import DisasterGuideModal from "../Common/DisasterGuideModal";
 import type { Notification } from "../../types";
 import {
   apiGetNotifications,
@@ -26,6 +27,7 @@ import {
   FaBoxes,
   FaHospital,
   FaPhoneAlt,
+  FaBookOpen,
 } from "react-icons/fa";
 
 function Navbar() {
@@ -37,6 +39,8 @@ function Navbar() {
   const [demoMenuOpen, setDemoMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [hotlinesOpen, setHotlinesOpen] = useState(false);
+  const [guideOpen, setGuideOpen] = useState(false);
+  const [guideTopic, setGuideTopic] = useState<string | undefined>(undefined);
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
@@ -86,6 +90,17 @@ function Navbar() {
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const handleOpenGuide = (e: any) => {
+      if (e?.detail?.topicId) {
+        setGuideTopic(e.detail.topicId);
+      }
+      setGuideOpen(true);
+    };
+    window.addEventListener("open-disaster-guide", handleOpenGuide);
+    return () => window.removeEventListener("open-disaster-guide", handleOpenGuide);
   }, []);
 
   const handleQuickLogin = async (role: "citizen" | "volunteer" | "admin") => {
@@ -259,6 +274,20 @@ function Navbar() {
               >
                 <FaPhoneAlt className="text-[10px] animate-pulse text-red-600" />
                 <span>SOS Helplines</span>
+              </button>
+
+              {/* Disaster & First-Aid Survival Guide Trigger */}
+              <button
+                type="button"
+                onClick={() => {
+                  setGuideTopic(undefined);
+                  setGuideOpen(true);
+                }}
+                className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold border border-blue-200/80 transition active:scale-95 shadow-2xs"
+                title="Disaster Survival & First-Aid Protocols"
+              >
+                <FaBookOpen className="text-[10px] text-blue-600" />
+                <span>First-Aid Guide</span>
               </button>
 
               {/* Report Emergency CTA */}
@@ -571,6 +600,13 @@ function Navbar() {
       <EmergencyHotlinesModal
         isOpen={hotlinesOpen}
         onClose={() => setHotlinesOpen(false)}
+      />
+
+      {/* Disaster Survival & First-Aid Guide Modal */}
+      <DisasterGuideModal
+        isOpen={guideOpen}
+        onClose={() => setGuideOpen(false)}
+        defaultTopicId={guideTopic}
       />
     </>
   );

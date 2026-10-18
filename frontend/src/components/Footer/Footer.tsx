@@ -29,6 +29,13 @@ function Footer() {
             <Link to="/track" className="hover:text-gray-900 transition">
               Track Incident
             </Link>
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new CustomEvent("open-disaster-guide"))}
+              className="hover:text-blue-600 transition font-semibold text-blue-600"
+            >
+              First-Aid Guide
+            </button>
             <Link to="/login" className="hover:text-gray-900 transition">
               Responder Portal
             </Link>
