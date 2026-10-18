@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../../components/Navbar/Navbar";
 import type { AnalyticsData } from "../../types";
-import { apiGetAnalytics } from "../../services/api";
+import { apiGetAnalytics, apiGetReports } from "../../services/api";
+import { exportIncidentsToCSV } from "../../utils/exportCsv";
 import {
   FaChartPie,
   FaUsers,
@@ -17,12 +18,14 @@ import {
   FaWind,
   FaMountain,
   FaRobot,
+  FaFileDownload,
 } from "react-icons/fa";
 
 export const AnalyticsDashboard: React.FC = () => {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   const fetchAnalytics = async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
@@ -44,6 +47,23 @@ export const AnalyticsDashboard: React.FC = () => {
   useEffect(() => {
     fetchAnalytics();
   }, []);
+
+  const handleExportCSV = async () => {
+    setExporting(true);
+    try {
+      const res = await apiGetReports();
+      if (res.success && res.reports) {
+        exportIncidentsToCSV(res.reports, `resqnet-analytics-log-${new Date().toISOString().slice(0, 10)}.csv`);
+      } else {
+        alert("Failed to fetch reports for CSV export.");
+      }
+    } catch (err) {
+      console.error("Export CSV error:", err);
+      alert("Error generating CSV export.");
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const getDisasterIcon = (type: string) => {
     const t = type.toLowerCase();
@@ -75,14 +95,27 @@ export const AnalyticsDashboard: React.FC = () => {
             </p>
           </div>
 
-          <button
-            onClick={() => fetchAnalytics(true)}
-            disabled={refreshing}
-            className="self-start sm:self-center px-4 py-2.5 rounded-2xl bg-gray-900 hover:bg-black text-white text-xs font-semibold shadow-sm transition flex items-center gap-2 disabled:opacity-50"
-          >
-            <FaSyncAlt className={`text-xs ${refreshing ? "animate-spin" : ""}`} />
-            <span>{refreshing ? "Computing Analytics..." : "Refresh Intelligence"}</span>
-          </button>
+          <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={handleExportCSV}
+              disabled={exporting}
+              className="px-4 py-2.5 rounded-2xl bg-white hover:bg-gray-100 border border-black/[0.08] text-gray-800 text-xs font-semibold shadow-xs transition flex items-center gap-2 disabled:opacity-50 active:scale-95"
+              title="Download Incident Telemetry as CSV"
+            >
+              <FaFileDownload className={`text-xs text-blue-600 ${exporting ? "animate-bounce" : ""}`} />
+              <span>{exporting ? "Exporting..." : "Export CSV"}</span>
+            </button>
+
+            <button
+              onClick={() => fetchAnalytics(true)}
+              disabled={refreshing}
+              className="self-start sm:self-center px-4 py-2.5 rounded-2xl bg-gray-900 hover:bg-black text-white text-xs font-semibold shadow-sm transition flex items-center gap-2 disabled:opacity-50"
+            >
+              <FaSyncAlt className={`text-xs ${refreshing ? "animate-spin" : ""}`} />
+              <span>{refreshing ? "Computing Analytics..." : "Refresh Intelligence"}</span>
+            </button>
+          </div>
         </div>
 
         {loading || !data ? (

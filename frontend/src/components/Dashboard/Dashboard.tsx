@@ -12,6 +12,7 @@ import {
   getFullImageUrl,
 } from "../../services/api";
 import { formatDistance } from "../../utils/geo";
+import { exportIncidentsToCSV } from "../../utils/exportCsv";
 import {
   FaSearch,
   FaUserShield,
@@ -22,6 +23,7 @@ import {
   FaRobot,
   FaExclamationTriangle,
   FaMagic,
+  FaFileDownload,
 } from "react-icons/fa";
 
 function Dashboard() {
@@ -284,6 +286,16 @@ function Dashboard() {
               <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
               <span>{activeVolunteersCount} Responders Active</span>
             </div>
+
+            <button
+              type="button"
+              onClick={() => exportIncidentsToCSV(filteredReports)}
+              className="px-3.5 py-2 rounded-2xl bg-white hover:bg-gray-100 border border-black/[0.08] text-gray-700 text-xs font-semibold shadow-xs transition flex items-center gap-2 active:scale-95"
+              title="Export filtered disaster records to CSV"
+            >
+              <FaFileDownload className="text-xs text-blue-600" />
+              <span>Export CSV</span>
+            </button>
 
             <button
               onClick={() => loadData(true)}
