@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import CriticalAlertBanner from "../Common/CriticalAlertBanner";
+import EmergencyHotlinesModal from "../Common/EmergencyHotlinesModal";
 import type { Notification } from "../../types";
 import {
   apiGetNotifications,
@@ -24,6 +25,7 @@ import {
   FaChartPie,
   FaBoxes,
   FaHospital,
+  FaPhoneAlt,
 } from "react-icons/fa";
 
 function Navbar() {
@@ -34,6 +36,7 @@ function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [demoMenuOpen, setDemoMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [hotlinesOpen, setHotlinesOpen] = useState(false);
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
@@ -247,6 +250,17 @@ function Navbar() {
 
             {/* Right Action Area */}
             <div className="flex items-center gap-2.5">
+              {/* SOS Hotlines Modal Trigger */}
+              <button
+                type="button"
+                onClick={() => setHotlinesOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold border border-red-200 transition active:scale-95 shadow-2xs"
+                title="24/7 National Emergency & Disaster Helplines"
+              >
+                <FaPhoneAlt className="text-[10px] animate-pulse text-red-600" />
+                <span>SOS Helplines</span>
+              </button>
+
               {/* Report Emergency CTA */}
               <Link
                 to="/report-emergency"
@@ -552,6 +566,12 @@ function Navbar() {
           </div>
         </div>
       </nav>
+
+      {/* 24/7 Disaster Helplines Modal */}
+      <EmergencyHotlinesModal
+        isOpen={hotlinesOpen}
+        onClose={() => setHotlinesOpen(false)}
+      />
     </>
   );
 }
