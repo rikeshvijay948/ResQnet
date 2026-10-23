@@ -4,6 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import CriticalAlertBanner from "../Common/CriticalAlertBanner";
 import EmergencyHotlinesModal from "../Common/EmergencyHotlinesModal";
 import DisasterGuideModal from "../Common/DisasterGuideModal";
+import CommandPaletteModal from "../Common/CommandPaletteModal";
 import type { Notification } from "../../types";
 import {
   apiGetNotifications,
@@ -28,6 +29,7 @@ import {
   FaHospital,
   FaPhoneAlt,
   FaBookOpen,
+  FaSearch,
 } from "react-icons/fa";
 
 function Navbar() {
@@ -41,6 +43,7 @@ function Navbar() {
   const [hotlinesOpen, setHotlinesOpen] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
   const [guideTopic, setGuideTopic] = useState<string | undefined>(undefined);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
@@ -101,6 +104,23 @@ function Navbar() {
     };
     window.addEventListener("open-disaster-guide", handleOpenGuide);
     return () => window.removeEventListener("open-disaster-guide", handleOpenGuide);
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setCommandPaletteOpen((prev) => !prev);
+      }
+    };
+    const handleOpenHotlines = () => setHotlinesOpen(true);
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("open-hotlines-modal", handleOpenHotlines);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("open-hotlines-modal", handleOpenHotlines);
+    };
   }, []);
 
   const handleQuickLogin = async (role: "citizen" | "volunteer" | "admin") => {
@@ -265,6 +285,20 @@ function Navbar() {
 
             {/* Right Action Area */}
             <div className="flex items-center gap-2.5">
+              {/* Quick Command Palette Button */}
+              <button
+                type="button"
+                onClick={() => setCommandPaletteOpen(true)}
+                className="hidden lg:inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-medium border border-black/[0.06] transition active:scale-95 shadow-2xs"
+                title="Command Palette (Ctrl+K)"
+              >
+                <FaSearch className="text-[10px] text-gray-400" />
+                <span>Commands</span>
+                <kbd className="px-1.5 py-0.5 rounded bg-white text-[9px] font-mono text-gray-500 border border-black/[0.08]">
+                  Ctrl K
+                </kbd>
+              </button>
+
               {/* SOS Hotlines Modal Trigger */}
               <button
                 type="button"
@@ -607,6 +641,12 @@ function Navbar() {
         isOpen={guideOpen}
         onClose={() => setGuideOpen(false)}
         defaultTopicId={guideTopic}
+      />
+
+      {/* Quick Command & Keyboard Navigation Palette */}
+      <CommandPaletteModal
+        isOpen={commandPaletteOpen}
+        onClose={() => setCommandPaletteOpen(false)}
       />
     </>
   );
