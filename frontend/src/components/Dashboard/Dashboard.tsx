@@ -13,6 +13,8 @@ import {
 } from "../../services/api";
 import { formatDistance } from "../../utils/geo";
 import { exportIncidentsToCSV } from "../../utils/exportCsv";
+import { soundAlerts } from "../../utils/soundAlerts";
+import SoundAlertToggle from "../Common/SoundAlertToggle";
 import {
   FaSearch,
   FaUserShield,
@@ -60,6 +62,10 @@ function Dashboard() {
       ]);
 
       if (reportsData.success && reportsData.reports) {
+        if (isRefresh && reports.length > 0 && reportsData.reports.length > reports.length) {
+          const newest = reportsData.reports[0];
+          soundAlerts.playAlertForIncident(newest.severity, newest.priorityRank);
+        }
         setReports(reportsData.reports);
       }
       if (volunteersData.success && volunteersData.volunteers) {
@@ -188,6 +194,7 @@ function Dashboard() {
         setAssigningReport(null);
         setSelectedVolunteerId("");
         setAssignedTeamInput("");
+        soundAlerts.playDispatchChime();
       } else {
         alert("Failed to assign: " + (res.message || "Unknown error"));
       }
@@ -286,6 +293,9 @@ function Dashboard() {
               <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
               <span>{activeVolunteersCount} Responders Active</span>
             </div>
+
+            {/* Audible Siren Alert Toggle */}
+            <SoundAlertToggle />
 
             <button
               type="button"
