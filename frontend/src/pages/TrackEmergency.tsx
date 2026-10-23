@@ -11,9 +11,11 @@ import {
   FaSyncAlt,
   FaInfoCircle,
   FaImage,
+  FaPrint,
 } from "react-icons/fa";
 import type { Report } from "../types";
 import { apiGetReportById, getFullImageUrl } from "../services/api";
+import { printTacticalDossier } from "../utils/printReport";
 
 const STATUS_STEPS = [
   { key: "Reported", label: "Incident Reported", desc: "Emergency received in system" },
@@ -164,15 +166,27 @@ export const TrackEmergency: React.FC = () => {
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => fetchReport(report._id)}
-                  disabled={loading}
-                  className="px-3.5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold flex items-center gap-1.5 transition"
-                >
-                  <FaSyncAlt className={`text-xs ${loading ? "animate-spin" : ""}`} />
-                  <span>Refresh</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => printTacticalDossier(report)}
+                    className="px-3.5 py-2 rounded-xl bg-white hover:bg-gray-100 border border-black/[0.08] text-gray-700 text-xs font-semibold shadow-xs flex items-center gap-1.5 transition active:scale-95"
+                    title="Print Tactical Incident Sheet for field rescue personnel"
+                  >
+                    <FaPrint className="text-xs text-blue-600" />
+                    <span>Print Dossier</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => fetchReport(report._id)}
+                    disabled={loading}
+                    className="px-3.5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold flex items-center gap-1.5 transition"
+                  >
+                    <FaSyncAlt className={`text-xs ${loading ? "animate-spin" : ""}`} />
+                    <span>Refresh</span>
+                  </button>
+                </div>
               </div>
 
               {/* Progress Steps */}

@@ -14,6 +14,7 @@ import {
 import { formatDistance } from "../../utils/geo";
 import { exportIncidentsToCSV } from "../../utils/exportCsv";
 import { soundAlerts } from "../../utils/soundAlerts";
+import { printTacticalDossier } from "../../utils/printReport";
 import SoundAlertToggle from "../Common/SoundAlertToggle";
 import {
   FaSearch,
@@ -26,6 +27,7 @@ import {
   FaExclamationTriangle,
   FaMagic,
   FaFileDownload,
+  FaPrint,
 } from "react-icons/fa";
 
 function Dashboard() {
@@ -791,12 +793,23 @@ function Dashboard() {
                   Reference ID: <span className="font-mono font-semibold">{selectedReport._id}</span>
                 </p>
               </div>
-              <button
-                onClick={() => setSelectedReport(null)}
-                className="text-gray-400 hover:text-gray-700 text-lg"
-              >
-                <FaTimes />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => printTacticalDossier(selectedReport)}
+                  className="px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold border border-blue-200/60 flex items-center gap-1.5 transition active:scale-95 shadow-2xs"
+                  title="Print official tactical dossier"
+                >
+                  <FaPrint className="text-xs" />
+                  <span>Print Dossier</span>
+                </button>
+                <button
+                  onClick={() => setSelectedReport(null)}
+                  className="text-gray-400 hover:text-gray-700 text-lg p-1"
+                >
+                  <FaTimes />
+                </button>
+              </div>
             </div>
 
             {/* Modal Body */}
