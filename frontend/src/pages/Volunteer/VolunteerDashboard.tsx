@@ -22,6 +22,7 @@ import {
   getFullImageUrl,
 } from "../../services/api";
 import { formatDistance, getDistanceKm, getEstimatedEtaMinutes } from "../../utils/geo";
+import BatterySentinelBadge from "../../components/Common/BatterySentinelBadge";
 
 export const VolunteerDashboard: React.FC = () => {
   const { user, refreshUser } = useAuth();
@@ -187,6 +188,9 @@ export const VolunteerDashboard: React.FC = () => {
                   <span>Offline</span>
                 </button>
               </div>
+
+              {/* Field Device Battery Sentinel */}
+              <BatterySentinelBadge />
             </div>
           </div>
         </div>

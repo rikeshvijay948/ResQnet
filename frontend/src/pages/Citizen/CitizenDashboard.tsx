@@ -17,6 +17,7 @@ import {
 } from "react-icons/fa";
 import type { Report } from "../../types";
 import { apiGetMyReports, getFullImageUrl } from "../../services/api";
+import BatterySentinelBadge from "../../components/Common/BatterySentinelBadge";
 
 export const CitizenDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -63,6 +64,7 @@ export const CitizenDashboard: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-3">
+              <BatterySentinelBadge />
               <Link
                 to="/report-emergency"
                 className="py-3 px-5 rounded-2xl bg-red-600 hover:bg-red-700 active:scale-95 text-white text-xs font-bold shadow-md shadow-red-500/20 transition flex items-center gap-2"
