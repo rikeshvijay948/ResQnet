@@ -191,6 +191,17 @@ export const VolunteerDashboard: React.FC = () => {
 
               {/* Field Device Battery Sentinel */}
               <BatterySentinelBadge />
+
+              {/* Tactical Compass HUD Trigger */}
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent("open-compass-modal"))}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-800 text-xs font-semibold border border-cyan-200/80 transition active:scale-95 shadow-2xs"
+                title="Open SAR Tactical Compass & Bearing HUD"
+              >
+                <span>🧭</span>
+                <span>Compass</span>
+              </button>
             </div>
           </div>
         </div>

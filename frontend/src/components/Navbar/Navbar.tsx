@@ -7,6 +7,7 @@ import DisasterGuideModal from "../Common/DisasterGuideModal";
 import CommandPaletteModal from "../Common/CommandPaletteModal";
 import EmergencyBeaconModal from "../Common/EmergencyBeaconModal";
 import EmergencyKitModal from "../Common/EmergencyKitModal";
+import TacticalCompassModal from "../Common/TacticalCompassModal";
 import type { Notification } from "../../types";
 import {
   apiGetNotifications,
@@ -50,6 +51,7 @@ function Navbar() {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [beaconOpen, setBeaconOpen] = useState(false);
   const [kitOpen, setKitOpen] = useState(false);
+  const [compassOpen, setCompassOpen] = useState(false);
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
@@ -122,16 +124,19 @@ function Navbar() {
     const handleOpenHotlines = () => setHotlinesOpen(true);
     const handleOpenBeacon = () => setBeaconOpen(true);
     const handleOpenKit = () => setKitOpen(true);
+    const handleOpenCompass = () => setCompassOpen(true);
 
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("open-hotlines-modal", handleOpenHotlines);
     window.addEventListener("open-beacon-modal", handleOpenBeacon);
     window.addEventListener("open-kit-modal", handleOpenKit);
+    window.addEventListener("open-compass-modal", handleOpenCompass);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("open-hotlines-modal", handleOpenHotlines);
       window.removeEventListener("open-beacon-modal", handleOpenBeacon);
       window.removeEventListener("open-kit-modal", handleOpenKit);
+      window.removeEventListener("open-compass-modal", handleOpenCompass);
     };
   }, []);
 
@@ -693,6 +698,12 @@ function Navbar() {
       <EmergencyKitModal
         isOpen={kitOpen}
         onClose={() => setKitOpen(false)}
+      />
+
+      {/* Tactical Compass & Field Heading Modal */}
+      <TacticalCompassModal
+        isOpen={compassOpen}
+        onClose={() => setCompassOpen(false)}
       />
     </>
   );

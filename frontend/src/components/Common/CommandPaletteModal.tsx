@@ -123,6 +123,19 @@ export default function CommandPaletteModal({ isOpen, onClose }: Props) {
         },
       },
       {
+        id: "tactical-compass",
+        title: "Tactical Compass & Orientation HUD",
+        subtitle: "Real-time magnetic heading, cardinal bearing & GPS coordinates for field SAR teams",
+        category: "Tools",
+        icon: FaCompass,
+        color: "bg-cyan-600 text-white",
+        badge: "Alt + C",
+        action: () => {
+          onClose();
+          window.dispatchEvent(new CustomEvent("open-compass-modal"));
+        },
+      },
+      {
         id: "toggle-sirens",
         title: "Toggle Audible Siren Alerts",
         subtitle: "Enable/disable acoustic Web Audio sirens for incoming P1 incidents",
