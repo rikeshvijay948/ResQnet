@@ -16,6 +16,7 @@ import { exportIncidentsToCSV } from "../../utils/exportCsv";
 import { soundAlerts } from "../../utils/soundAlerts";
 import { printTacticalDossier } from "../../utils/printReport";
 import SoundAlertToggle from "../Common/SoundAlertToggle";
+import WeatherHazardWidget from "../Common/WeatherHazardWidget";
 import {
   FaSearch,
   FaUserShield,
@@ -372,6 +373,9 @@ function Dashboard() {
             <p className="text-[11px] text-emerald-500/80 mt-1">Area secured</p>
           </div>
         </div>
+
+        {/* Meteorological & Environmental Threat Sentinel */}
+        <WeatherHazardWidget />
 
         {/* ================= LIVE EMERGENCY MAP ================= */}
         <div className="mb-8">
