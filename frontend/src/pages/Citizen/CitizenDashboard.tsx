@@ -64,6 +64,15 @@ export const CitizenDashboard: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent("open-kit-modal"))}
+                className="py-3 px-4 rounded-2xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold border border-emerald-200/80 transition active:scale-95 flex items-center gap-2 shadow-2xs"
+                title="Audit your 72-Hour Evacuation Go-Bag"
+              >
+                <span>🎒</span>
+                <span>Go-Bag Checklist</span>
+              </button>
               <BatterySentinelBadge />
               <Link
                 to="/report-emergency"

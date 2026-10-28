@@ -6,6 +6,7 @@ import EmergencyHotlinesModal from "../Common/EmergencyHotlinesModal";
 import DisasterGuideModal from "../Common/DisasterGuideModal";
 import CommandPaletteModal from "../Common/CommandPaletteModal";
 import EmergencyBeaconModal from "../Common/EmergencyBeaconModal";
+import EmergencyKitModal from "../Common/EmergencyKitModal";
 import type { Notification } from "../../types";
 import {
   apiGetNotifications,
@@ -32,6 +33,7 @@ import {
   FaBookOpen,
   FaSearch,
   FaLightbulb,
+  FaSuitcaseRolling,
 } from "react-icons/fa";
 
 function Navbar() {
@@ -47,6 +49,7 @@ function Navbar() {
   const [guideTopic, setGuideTopic] = useState<string | undefined>(undefined);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [beaconOpen, setBeaconOpen] = useState(false);
+  const [kitOpen, setKitOpen] = useState(false);
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
@@ -118,14 +121,17 @@ function Navbar() {
     };
     const handleOpenHotlines = () => setHotlinesOpen(true);
     const handleOpenBeacon = () => setBeaconOpen(true);
+    const handleOpenKit = () => setKitOpen(true);
 
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("open-hotlines-modal", handleOpenHotlines);
     window.addEventListener("open-beacon-modal", handleOpenBeacon);
+    window.addEventListener("open-kit-modal", handleOpenKit);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("open-hotlines-modal", handleOpenHotlines);
       window.removeEventListener("open-beacon-modal", handleOpenBeacon);
+      window.removeEventListener("open-kit-modal", handleOpenKit);
     };
   }, []);
 
@@ -339,6 +345,17 @@ function Navbar() {
               >
                 <FaLightbulb className="text-[10px] text-amber-600" />
                 <span>SOS Beacon</span>
+              </button>
+
+              {/* 72-Hour Disaster Go-Bag Checklist Trigger */}
+              <button
+                type="button"
+                onClick={() => setKitOpen(true)}
+                className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold border border-emerald-200/80 transition active:scale-95 shadow-2xs"
+                title="72-Hour Evacuation Go-Bag Checklist"
+              >
+                <FaSuitcaseRolling className="text-[10px] text-emerald-600" />
+                <span>Go-Bag</span>
               </button>
 
               {/* Report Emergency CTA */}
@@ -670,6 +687,12 @@ function Navbar() {
       <EmergencyBeaconModal
         isOpen={beaconOpen}
         onClose={() => setBeaconOpen(false)}
+      />
+
+      {/* 72-Hour Disaster Go-Bag Checklist Modal */}
+      <EmergencyKitModal
+        isOpen={kitOpen}
+        onClose={() => setKitOpen(false)}
       />
     </>
   );

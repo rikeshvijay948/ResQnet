@@ -15,6 +15,7 @@ import {
   FaVolumeUp,
   FaCompass,
   FaLightbulb,
+  FaSuitcaseRolling,
 } from "react-icons/fa";
 import { soundAlerts } from "../../utils/soundAlerts";
 
@@ -106,6 +107,19 @@ export default function CommandPaletteModal({ isOpen, onClose }: Props) {
         action: () => {
           onClose();
           window.dispatchEvent(new CustomEvent("open-disaster-guide"));
+        },
+      },
+      {
+        id: "emergency-kit",
+        title: "72-Hour Disaster Go-Bag Checklist",
+        subtitle: "Audit essential water, trauma medical kit, rations & vital evacuation supplies",
+        category: "Emergency Action",
+        icon: FaSuitcaseRolling,
+        color: "bg-emerald-600 text-white",
+        badge: "Alt + K",
+        action: () => {
+          onClose();
+          window.dispatchEvent(new CustomEvent("open-kit-modal"));
         },
       },
       {
