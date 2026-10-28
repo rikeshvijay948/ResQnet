@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FaSearch,
@@ -14,6 +14,7 @@ import {
   FaBookOpen,
   FaVolumeUp,
   FaCompass,
+  FaLightbulb,
 } from "react-icons/fa";
 import { soundAlerts } from "../../utils/soundAlerts";
 
@@ -79,6 +80,19 @@ export default function CommandPaletteModal({ isOpen, onClose }: Props) {
         action: () => {
           onClose();
           window.dispatchEvent(new CustomEvent("open-hotlines-modal"));
+        },
+      },
+      {
+        id: "sos-beacon",
+        title: "SOS Flashlight & Strobe Beacon",
+        subtitle: "Full-screen Morse code optical beacon and acoustic distress alarm for night rescue",
+        category: "Emergency Action",
+        icon: FaLightbulb,
+        color: "bg-amber-500 text-black",
+        badge: "Alt + B",
+        action: () => {
+          onClose();
+          window.dispatchEvent(new CustomEvent("open-beacon-modal"));
         },
       },
       {

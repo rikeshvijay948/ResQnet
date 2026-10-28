@@ -5,6 +5,7 @@ import CriticalAlertBanner from "../Common/CriticalAlertBanner";
 import EmergencyHotlinesModal from "../Common/EmergencyHotlinesModal";
 import DisasterGuideModal from "../Common/DisasterGuideModal";
 import CommandPaletteModal from "../Common/CommandPaletteModal";
+import EmergencyBeaconModal from "../Common/EmergencyBeaconModal";
 import type { Notification } from "../../types";
 import {
   apiGetNotifications,
@@ -30,6 +31,7 @@ import {
   FaPhoneAlt,
   FaBookOpen,
   FaSearch,
+  FaLightbulb,
 } from "react-icons/fa";
 
 function Navbar() {
@@ -44,6 +46,7 @@ function Navbar() {
   const [guideOpen, setGuideOpen] = useState(false);
   const [guideTopic, setGuideTopic] = useState<string | undefined>(undefined);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [beaconOpen, setBeaconOpen] = useState(false);
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
@@ -114,12 +117,15 @@ function Navbar() {
       }
     };
     const handleOpenHotlines = () => setHotlinesOpen(true);
+    const handleOpenBeacon = () => setBeaconOpen(true);
 
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("open-hotlines-modal", handleOpenHotlines);
+    window.addEventListener("open-beacon-modal", handleOpenBeacon);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("open-hotlines-modal", handleOpenHotlines);
+      window.removeEventListener("open-beacon-modal", handleOpenBeacon);
     };
   }, []);
 
@@ -322,6 +328,17 @@ function Navbar() {
               >
                 <FaBookOpen className="text-[10px] text-blue-600" />
                 <span>First-Aid Guide</span>
+              </button>
+
+              {/* Emergency Optical & Strobe Beacon Trigger */}
+              <button
+                type="button"
+                onClick={() => setBeaconOpen(true)}
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold border border-amber-200/80 transition active:scale-95 shadow-2xs"
+                title="SOS Flashlight & Strobe Beacon (Morse Code Locator)"
+              >
+                <FaLightbulb className="text-[10px] text-amber-600" />
+                <span>SOS Beacon</span>
               </button>
 
               {/* Report Emergency CTA */}
@@ -647,6 +664,12 @@ function Navbar() {
       <CommandPaletteModal
         isOpen={commandPaletteOpen}
         onClose={() => setCommandPaletteOpen(false)}
+      />
+
+      {/* SOS Optical Strobe & Acoustic Beacon Modal */}
+      <EmergencyBeaconModal
+        isOpen={beaconOpen}
+        onClose={() => setBeaconOpen(false)}
       />
     </>
   );
