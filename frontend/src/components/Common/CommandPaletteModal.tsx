@@ -16,6 +16,7 @@ import {
   FaCompass,
   FaLightbulb,
   FaSuitcaseRolling,
+  FaMicrophone,
 } from "react-icons/fa";
 import { soundAlerts } from "../../utils/soundAlerts";
 
@@ -55,6 +56,19 @@ export default function CommandPaletteModal({ isOpen, onClose }: Props) {
         action: () => {
           navigate("/report-emergency");
           onClose();
+        },
+      },
+      {
+        id: "voice-broadcast",
+        title: "Hands-Free Voice Dispatcher",
+        subtitle: "Dictate crisis location, trapped casualties and hazards without touching screen",
+        category: "Emergency Action",
+        icon: FaMicrophone,
+        color: "bg-rose-600 text-white",
+        badge: "Alt + V",
+        action: () => {
+          onClose();
+          window.dispatchEvent(new CustomEvent("open-voice-modal"));
         },
       },
       {

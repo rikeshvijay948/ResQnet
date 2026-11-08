@@ -8,6 +8,7 @@ import CommandPaletteModal from "../Common/CommandPaletteModal";
 import EmergencyBeaconModal from "../Common/EmergencyBeaconModal";
 import EmergencyKitModal from "../Common/EmergencyKitModal";
 import TacticalCompassModal from "../Common/TacticalCompassModal";
+import VoiceBroadcastModal from "../Common/VoiceBroadcastModal";
 import type { Notification } from "../../types";
 import {
   apiGetNotifications,
@@ -35,6 +36,7 @@ import {
   FaSearch,
   FaLightbulb,
   FaSuitcaseRolling,
+  FaMicrophone,
 } from "react-icons/fa";
 
 function Navbar() {
@@ -52,6 +54,7 @@ function Navbar() {
   const [beaconOpen, setBeaconOpen] = useState(false);
   const [kitOpen, setKitOpen] = useState(false);
   const [compassOpen, setCompassOpen] = useState(false);
+  const [voiceOpen, setVoiceOpen] = useState(false);
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
@@ -125,18 +128,21 @@ function Navbar() {
     const handleOpenBeacon = () => setBeaconOpen(true);
     const handleOpenKit = () => setKitOpen(true);
     const handleOpenCompass = () => setCompassOpen(true);
+    const handleOpenVoice = () => setVoiceOpen(true);
 
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("open-hotlines-modal", handleOpenHotlines);
     window.addEventListener("open-beacon-modal", handleOpenBeacon);
     window.addEventListener("open-kit-modal", handleOpenKit);
     window.addEventListener("open-compass-modal", handleOpenCompass);
+    window.addEventListener("open-voice-modal", handleOpenVoice);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("open-hotlines-modal", handleOpenHotlines);
       window.removeEventListener("open-beacon-modal", handleOpenBeacon);
       window.removeEventListener("open-kit-modal", handleOpenKit);
       window.removeEventListener("open-compass-modal", handleOpenCompass);
+      window.removeEventListener("open-voice-modal", handleOpenVoice);
     };
   }, []);
 
@@ -361,6 +367,17 @@ function Navbar() {
               >
                 <FaSuitcaseRolling className="text-[10px] text-emerald-600" />
                 <span>Go-Bag</span>
+              </button>
+
+              {/* Emergency Voice Broadcast Trigger */}
+              <button
+                type="button"
+                onClick={() => setVoiceOpen(true)}
+                className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold border border-rose-200/80 transition active:scale-95 shadow-2xs"
+                title="Hands-Free Voice SOS & Dispatcher"
+              >
+                <FaMicrophone className="text-[10px] text-rose-600" />
+                <span>Voice SOS</span>
               </button>
 
               {/* Report Emergency CTA */}
@@ -704,6 +721,12 @@ function Navbar() {
       <TacticalCompassModal
         isOpen={compassOpen}
         onClose={() => setCompassOpen(false)}
+      />
+
+      {/* Hands-Free Voice SOS & Dictation Modal */}
+      <VoiceBroadcastModal
+        isOpen={voiceOpen}
+        onClose={() => setVoiceOpen(false)}
       />
     </>
   );

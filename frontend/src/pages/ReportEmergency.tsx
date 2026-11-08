@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar/Navbar";
 import {
@@ -30,11 +30,13 @@ import {
   FaTimes,
   FaSyncAlt,
   FaRedo,
+  FaMicrophone,
 } from "react-icons/fa";
 
 export default function ReportEmergency() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const routerLocation = useLocation();
 
   const [fullName, setFullName] = useState(user?.name || "");
   const [phoneNumber, setPhoneNumber] = useState(user?.phone || "");
@@ -80,6 +82,12 @@ export default function ReportEmergency() {
       if (!phoneNumber && user.phone) setPhoneNumber(user.phone);
     }
   }, [user]);
+
+  useEffect(() => {
+    if (routerLocation.state && (routerLocation.state as any).prefilledDescription) {
+      setDescription((routerLocation.state as any).prefilledDescription);
+    }
+  }, [routerLocation.state]);
 
   // Clean up camera stream on unmount
   useEffect(() => {
@@ -715,16 +723,29 @@ export default function ReportEmergency() {
                     <span>Emergency Situation Description</span>
                   </h2>
 
-                  {/* AI AUTO-CLASSIFY BUTTON */}
-                  <button
-                    type="button"
-                    onClick={handleAIAutoClassify}
-                    disabled={aiLoading}
-                    className="px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold border border-purple-200 flex items-center gap-1.5 transition active:scale-95 shadow-2xs disabled:opacity-50"
-                  >
-                    <FaMagic className={`text-xs ${aiLoading ? "animate-spin" : "text-purple-600"}`} />
-                    <span>{aiLoading ? "AI Analyzing Text..." : "✨ AI Auto-Classify"}</span>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    {/* VOICE DICTATE BUTTON */}
+                    <button
+                      type="button"
+                      onClick={() => window.dispatchEvent(new CustomEvent("open-voice-modal"))}
+                      className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold border border-rose-200 flex items-center gap-1.5 transition active:scale-95 shadow-2xs"
+                      title="Open hands-free emergency voice dictation"
+                    >
+                      <FaMicrophone className="text-xs text-rose-600" />
+                      <span>🎙️ Voice Dictate</span>
+                    </button>
+
+                    {/* AI AUTO-CLASSIFY BUTTON */}
+                    <button
+                      type="button"
+                      onClick={handleAIAutoClassify}
+                      disabled={aiLoading}
+                      className="px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold border border-purple-200 flex items-center gap-1.5 transition active:scale-95 shadow-2xs disabled:opacity-50"
+                    >
+                      <FaMagic className={`text-xs ${aiLoading ? "animate-spin" : "text-purple-600"}`} />
+                      <span>{aiLoading ? "AI Analyzing Text..." : "✨ AI Auto-Classify"}</span>
+                    </button>
+                  </div>
                 </div>
 
                 <textarea
