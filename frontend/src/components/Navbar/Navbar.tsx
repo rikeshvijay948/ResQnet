@@ -15,7 +15,9 @@ import {
   apiGetNotifications,
   apiMarkAllNotificationsRead,
   apiMarkNotificationRead,
+  apiCreateReport,
 } from "../../services/api";
+import { setupOfflineAutoSync, getOfflineReports } from "../../utils/offlineQueue";
 import {
   FaShieldAlt,
   FaSignOutAlt,
@@ -57,6 +59,7 @@ function Navbar() {
   const [compassOpen, setCompassOpen] = useState(false);
   const [voiceOpen, setVoiceOpen] = useState(false);
   const [triageOpen, setTriageOpen] = useState(false);
+  const [offlineCount, setOfflineCount] = useState<number>(0);
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
@@ -82,6 +85,20 @@ function Navbar() {
     const interval = setInterval(fetchNotifs, 15000);
     return () => clearInterval(interval);
   }, [user]);
+
+  // Resilient offline incident queue auto-synchronizer
+  useEffect(() => {
+    setOfflineCount(getOfflineReports().length);
+    const unregister = setupOfflineAutoSync(apiCreateReport);
+    const handleQueueChange = () => setOfflineCount(getOfflineReports().length);
+    window.addEventListener("resqnet-offline-queue-changed", handleQueueChange);
+    window.addEventListener("resqnet-offline-reports-synced", handleQueueChange);
+    return () => {
+      unregister();
+      window.removeEventListener("resqnet-offline-queue-changed", handleQueueChange);
+      window.removeEventListener("resqnet-offline-reports-synced", handleQueueChange);
+    };
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -384,6 +401,18 @@ function Navbar() {
                 <FaMicrophone className="text-[10px] text-rose-600" />
                 <span>Voice SOS</span>
               </button>
+
+              {/* Resilient Offline Queue Indicator Badge */}
+              {offlineCount > 0 && (
+                <Link
+                  to="/report-emergency"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-100 hover:bg-amber-200 text-amber-900 text-xs font-bold border border-amber-300 transition active:scale-95 shadow-2xs animate-pulse"
+                  title={`${offlineCount} emergency report(s) queued offline. Click to view or sync.`}
+                >
+                  <span className="w-2 h-2 rounded-full bg-amber-600"></span>
+                  <span>{offlineCount} Offline</span>
+                </Link>
+              )}
 
               {/* Report Emergency CTA */}
               <Link

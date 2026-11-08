@@ -12,6 +12,12 @@ import {
 import { getDistanceKm } from "../utils/geo";
 import type { AIClassificationResult, Report } from "../types";
 import {
+  enqueueOfflineReport,
+  getOfflineReports,
+  syncQueuedReports,
+  type QueuedOfflineReport,
+} from "../utils/offlineQueue";
+import {
   FaMapMarkerAlt,
   FaSearch,
   FaCrosshairs,
@@ -75,6 +81,40 @@ export default function ReportEmergency() {
   const [submitting, setSubmitting] = useState(false);
   const [submittedReport, setSubmittedReport] = useState<any | null>(null);
   const [copiedId, setCopiedId] = useState(false);
+
+  // Resilient Offline Queue state
+  const [offlineQueuedReport, setOfflineQueuedReport] = useState<QueuedOfflineReport | null>(null);
+  const [offlineQueueCount, setOfflineQueueCount] = useState<number>(0);
+  const [syncingOffline, setSyncingOffline] = useState(false);
+  const [offlineSyncMessage, setOfflineSyncMessage] = useState("");
+
+  useEffect(() => {
+    const updateCount = () => {
+      setOfflineQueueCount(getOfflineReports().length);
+    };
+    updateCount();
+    window.addEventListener("resqnet-offline-queue-changed", updateCount);
+    return () => window.removeEventListener("resqnet-offline-queue-changed", updateCount);
+  }, []);
+
+  const handleManualSync = async () => {
+    setSyncingOffline(true);
+    setOfflineSyncMessage("");
+    try {
+      const res = await syncQueuedReports(apiCreateReport);
+      if (res.synced > 0) {
+        setOfflineSyncMessage(`Successfully synced ${res.synced} offline report(s)!`);
+        setTimeout(() => setOfflineSyncMessage(""), 4000);
+      } else if (res.failed > 0) {
+        setOfflineSyncMessage(`Could not sync yet. Connection unavailable.`);
+        setTimeout(() => setOfflineSyncMessage(""), 4000);
+      }
+    } catch {
+      setOfflineSyncMessage("Sync error. Will retry when connection improves.");
+    } finally {
+      setSyncingOffline(false);
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -410,24 +450,27 @@ export default function ReportEmergency() {
       imageUrl: uploadedImageUrl,
     };
 
+    // Offline network detection: store locally if network is down
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      const queued = enqueueOfflineReport(reportData);
+      setOfflineQueuedReport(queued);
+      setSubmitting(false);
+      return;
+    }
+
     try {
       const response = await apiCreateReport(reportData);
 
       if (response.success && response.report) {
         setSubmittedReport(response.report);
       } else {
-        alert(
-          "Failed to submit emergency report: " +
-            (response.message || "Unknown error")
-        );
+        const queued = enqueueOfflineReport(reportData);
+        setOfflineQueuedReport(queued);
       }
     } catch (error) {
-      console.error("Emergency report submission error:", error);
-      alert(
-        error instanceof Error
-          ? error.message
-          : "Could not connect to the ResQNet backend."
-      );
+      console.warn("Emergency report submission network error, fallback to offline queue:", error);
+      const queued = enqueueOfflineReport(reportData);
+      setOfflineQueuedReport(queued);
     } finally {
       setSubmitting(false);
     }
@@ -443,6 +486,7 @@ export default function ReportEmergency() {
 
   const resetForm = () => {
     setSubmittedReport(null);
+    setOfflineQueuedReport(null);
     setFullName(user?.name || "");
     setPhoneNumber(user?.phone || "");
     setEmergencyContact("");
@@ -465,8 +509,66 @@ export default function ReportEmergency() {
       <Navbar />
 
       <main className="max-w-3xl mx-auto px-4 py-10 w-full">
-        {/* SUCCESS CONFIRMATION MODAL CARD */}
-        {submittedReport ? (
+        {/* RESILIENT OFFLINE CONFIRMATION CARD */}
+        {offlineQueuedReport ? (
+          <div className="bg-white/90 backdrop-blur-xl rounded-3xl p-8 sm:p-12 shadow-2xl border border-amber-200/80 text-center animate-in fade-in zoom-in-95 duration-200">
+            <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm animate-pulse">
+              <FaShieldAlt className="text-3xl" />
+            </div>
+
+            <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold uppercase tracking-wider">
+              Network Blackout Protection Active
+            </span>
+
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 mt-3">
+              Distress Signal Queued in Device Storage
+            </h1>
+            <p className="text-gray-600 mt-2 max-w-md mx-auto text-sm leading-relaxed">
+              Active Internet connectivity is interrupted. Your emergency report has been safely saved to your device storage. ResQNet will automatically broadcast it to dispatchers the instant network connectivity is restored.
+            </p>
+
+            <div className="mt-6 p-5 bg-amber-50/70 rounded-2xl border border-amber-200 max-w-md mx-auto text-left">
+              <p className="text-xs font-semibold uppercase tracking-wider text-amber-800">
+                Offline Queue ID
+              </p>
+              <div className="flex items-center justify-between mt-2">
+                <code className="text-sm font-mono font-bold text-gray-900 truncate">
+                  {offlineQueuedReport.id}
+                </code>
+                <span className="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 text-[10px] font-bold">
+                  Auto-Sync Pending
+                </span>
+              </div>
+              <p className="text-[11px] text-gray-500 mt-2">
+                Location: {offlineQueuedReport.payload.location || "GPS Pin"} • Hazard: {offlineQueuedReport.payload.disasterType} • Priority: {offlineQueuedReport.payload.severity}
+              </p>
+            </div>
+
+            {offlineSyncMessage && (
+              <p className="text-xs font-bold text-blue-600 mt-3">{offlineSyncMessage}</p>
+            )}
+
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md mx-auto">
+              <button
+                type="button"
+                onClick={handleManualSync}
+                disabled={syncingOffline}
+                className="w-full sm:w-auto flex-1 py-3 px-6 rounded-2xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-semibold text-sm shadow-md transition flex items-center justify-center gap-2"
+              >
+                <FaSyncAlt className={`text-xs ${syncingOffline ? "animate-spin" : ""}`} />
+                <span>{syncingOffline ? "Checking Connection..." : "Attempt Sync Now"}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={resetForm}
+                className="w-full sm:w-auto py-3 px-6 rounded-2xl bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold text-sm transition"
+              >
+                Submit Another Report
+              </button>
+            </div>
+          </div>
+        ) : submittedReport ? (
           <div className="bg-white/90 backdrop-blur-xl rounded-3xl p-8 sm:p-12 shadow-2xl border border-black/[0.06] text-center animate-in fade-in zoom-in-95 duration-200">
             <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
               <FaCheckCircle className="text-3xl" />
@@ -565,6 +667,32 @@ export default function ReportEmergency() {
                 </button>
               </div>
             </div>
+
+            {/* PENDING OFFLINE QUEUE BANNER */}
+            {offlineQueueCount > 0 && (
+              <div className="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-xs flex items-center justify-between gap-3 animate-in fade-in duration-200 shadow-2xs">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping shrink-0"></span>
+                  <div>
+                    <span className="font-bold">
+                      {offlineQueueCount} emergency report{offlineQueueCount > 1 ? "s" : ""} queued offline in device storage.
+                    </span>{" "}
+                    <span className="text-amber-700 hidden sm:inline">
+                      ResQNet will automatically broadcast the second network connection is restored.
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleManualSync}
+                  disabled={syncingOffline}
+                  className="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] flex items-center gap-1.5 shrink-0 transition"
+                >
+                  <FaSyncAlt className={`text-[10px] ${syncingOffline ? "animate-spin" : ""}`} />
+                  <span>{syncingOffline ? "Syncing..." : "Sync Now"}</span>
+                </button>
+              </div>
+            )}
 
             {/* LIVE DUPLICATE WARNING BANNER */}
             {duplicateWarning && (
