@@ -202,6 +202,17 @@ export const VolunteerDashboard: React.FC = () => {
                 <span>🧭</span>
                 <span>Compass</span>
               </button>
+
+              {/* START Mass-Casualty Triage Trigger */}
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent("open-triage-modal"))}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 text-xs font-semibold border border-rose-200/80 transition active:scale-95 shadow-2xs"
+                title="Open START & JumpSTART Mass-Casualty Triage Protocol"
+              >
+                <span>🏷️</span>
+                <span>MCI Triage</span>
+              </button>
             </div>
           </div>
         </div>

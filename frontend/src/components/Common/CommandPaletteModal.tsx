@@ -17,6 +17,7 @@ import {
   FaLightbulb,
   FaSuitcaseRolling,
   FaMicrophone,
+  FaHeartbeat,
 } from "react-icons/fa";
 import { soundAlerts } from "../../utils/soundAlerts";
 
@@ -69,6 +70,19 @@ export default function CommandPaletteModal({ isOpen, onClose }: Props) {
         action: () => {
           onClose();
           window.dispatchEvent(new CustomEvent("open-voice-modal"));
+        },
+      },
+      {
+        id: "start-triage",
+        title: "START Disaster Triage Sentinel",
+        subtitle: "Rapid adult START & pediatric JumpSTART triage decision tree with sector casualty tally",
+        category: "Emergency Action",
+        icon: FaHeartbeat,
+        color: "bg-rose-700 text-white",
+        badge: "Alt + T",
+        action: () => {
+          onClose();
+          window.dispatchEvent(new CustomEvent("open-triage-modal"));
         },
       },
       {

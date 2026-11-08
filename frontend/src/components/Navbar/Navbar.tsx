@@ -9,6 +9,7 @@ import EmergencyBeaconModal from "../Common/EmergencyBeaconModal";
 import EmergencyKitModal from "../Common/EmergencyKitModal";
 import TacticalCompassModal from "../Common/TacticalCompassModal";
 import VoiceBroadcastModal from "../Common/VoiceBroadcastModal";
+import STARTTriageModal from "../Common/STARTTriageModal";
 import type { Notification } from "../../types";
 import {
   apiGetNotifications,
@@ -55,6 +56,7 @@ function Navbar() {
   const [kitOpen, setKitOpen] = useState(false);
   const [compassOpen, setCompassOpen] = useState(false);
   const [voiceOpen, setVoiceOpen] = useState(false);
+  const [triageOpen, setTriageOpen] = useState(false);
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
@@ -129,6 +131,7 @@ function Navbar() {
     const handleOpenKit = () => setKitOpen(true);
     const handleOpenCompass = () => setCompassOpen(true);
     const handleOpenVoice = () => setVoiceOpen(true);
+    const handleOpenTriage = () => setTriageOpen(true);
 
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("open-hotlines-modal", handleOpenHotlines);
@@ -136,6 +139,7 @@ function Navbar() {
     window.addEventListener("open-kit-modal", handleOpenKit);
     window.addEventListener("open-compass-modal", handleOpenCompass);
     window.addEventListener("open-voice-modal", handleOpenVoice);
+    window.addEventListener("open-triage-modal", handleOpenTriage);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("open-hotlines-modal", handleOpenHotlines);
@@ -143,6 +147,7 @@ function Navbar() {
       window.removeEventListener("open-kit-modal", handleOpenKit);
       window.removeEventListener("open-compass-modal", handleOpenCompass);
       window.removeEventListener("open-voice-modal", handleOpenVoice);
+      window.removeEventListener("open-triage-modal", handleOpenTriage);
     };
   }, []);
 
@@ -727,6 +732,12 @@ function Navbar() {
       <VoiceBroadcastModal
         isOpen={voiceOpen}
         onClose={() => setVoiceOpen(false)}
+      />
+
+      {/* START Disaster Mass-Casualty Triage Modal */}
+      <STARTTriageModal
+        isOpen={triageOpen}
+        onClose={() => setTriageOpen(false)}
       />
     </>
   );
