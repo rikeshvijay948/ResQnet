@@ -18,6 +18,7 @@ import {
   FaSuitcaseRolling,
   FaMicrophone,
   FaHeartbeat,
+  FaIdCard,
 } from "react-icons/fa";
 import { soundAlerts } from "../../utils/soundAlerts";
 
@@ -83,6 +84,19 @@ export default function CommandPaletteModal({ isOpen, onClose }: Props) {
         action: () => {
           onClose();
           window.dispatchEvent(new CustomEvent("open-triage-modal"));
+        },
+      },
+      {
+        id: "ice-medical-card",
+        title: "Emergency Medical ICE ID Card",
+        subtitle: "Personal medical profile, blood type, critical allergies & next-of-kin contacts",
+        category: "Emergency Action",
+        icon: FaIdCard,
+        color: "bg-red-600 text-white",
+        badge: "Alt + I",
+        action: () => {
+          onClose();
+          window.dispatchEvent(new CustomEvent("open-ice-card-modal"));
         },
       },
       {

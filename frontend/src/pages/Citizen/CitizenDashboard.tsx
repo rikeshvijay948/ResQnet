@@ -73,6 +73,16 @@ export const CitizenDashboard: React.FC = () => {
                 <span>🎒</span>
                 <span>Go-Bag Checklist</span>
               </button>
+
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent("open-ice-card-modal"))}
+                className="py-3 px-4 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-800 text-xs font-bold border border-rose-200/80 transition active:scale-95 flex items-center gap-2 shadow-2xs"
+                title="View and update your personal Emergency Medical ICE Card"
+              >
+                <span>🪪</span>
+                <span>ICE Medical ID</span>
+              </button>
               <BatterySentinelBadge />
               <Link
                 to="/report-emergency"
@@ -230,8 +240,32 @@ export const CitizenDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* RIGHT 1 COL: EMERGENCY DIRECTORY */}
+          {/* RIGHT 1 COL: EMERGENCY DIRECTORY & ICE CARD */}
           <div className="space-y-6">
+            {/* PERSONAL ICE MEDICAL ID CARD QUICK ACCESS */}
+            <div className="bg-gradient-to-br from-gray-900 via-indigo-950 to-blue-950 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden border border-white/10">
+              <div className="relative z-10">
+                <div className="flex items-center justify-between">
+                  <span className="px-2.5 py-0.5 rounded-full bg-red-500/30 text-red-200 border border-red-400/40 text-[10px] font-black uppercase tracking-wider">
+                    Paramedic Protocol
+                  </span>
+                  <span className="text-xl">🪪</span>
+                </div>
+                <h3 className="text-base font-bold mt-2.5">Emergency Medical ICE ID</h3>
+                <p className="text-xs text-blue-100/80 mt-1 leading-relaxed">
+                  Store on-device blood type, critical drug allergies &amp; next-of-kin contacts for trauma triage teams.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => window.dispatchEvent(new CustomEvent("open-ice-card-modal"))}
+                  className="mt-4 w-full py-2.5 px-4 rounded-xl bg-white text-gray-900 font-bold text-xs hover:bg-gray-100 transition active:scale-95 shadow-sm flex items-center justify-center gap-2"
+                >
+                  <span>Open ICE Medical Badge</span>
+                  <span>→</span>
+                </button>
+              </div>
+            </div>
+
             <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-black/[0.06]">
               <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-4 flex items-center gap-2">
                 <FaPhoneAlt className="text-blue-600" />

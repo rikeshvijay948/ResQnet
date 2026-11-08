@@ -10,6 +10,7 @@ import EmergencyKitModal from "../Common/EmergencyKitModal";
 import TacticalCompassModal from "../Common/TacticalCompassModal";
 import VoiceBroadcastModal from "../Common/VoiceBroadcastModal";
 import STARTTriageModal from "../Common/STARTTriageModal";
+import EmergencyIdCardModal from "../Common/EmergencyIdCardModal";
 import type { Notification } from "../../types";
 import {
   apiGetNotifications,
@@ -59,6 +60,7 @@ function Navbar() {
   const [compassOpen, setCompassOpen] = useState(false);
   const [voiceOpen, setVoiceOpen] = useState(false);
   const [triageOpen, setTriageOpen] = useState(false);
+  const [iceCardOpen, setIceCardOpen] = useState(false);
   const [offlineCount, setOfflineCount] = useState<number>(0);
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -149,6 +151,7 @@ function Navbar() {
     const handleOpenCompass = () => setCompassOpen(true);
     const handleOpenVoice = () => setVoiceOpen(true);
     const handleOpenTriage = () => setTriageOpen(true);
+    const handleOpenIceCard = () => setIceCardOpen(true);
 
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("open-hotlines-modal", handleOpenHotlines);
@@ -157,6 +160,7 @@ function Navbar() {
     window.addEventListener("open-compass-modal", handleOpenCompass);
     window.addEventListener("open-voice-modal", handleOpenVoice);
     window.addEventListener("open-triage-modal", handleOpenTriage);
+    window.addEventListener("open-ice-card-modal", handleOpenIceCard);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("open-hotlines-modal", handleOpenHotlines);
@@ -165,6 +169,7 @@ function Navbar() {
       window.removeEventListener("open-compass-modal", handleOpenCompass);
       window.removeEventListener("open-voice-modal", handleOpenVoice);
       window.removeEventListener("open-triage-modal", handleOpenTriage);
+      window.removeEventListener("open-ice-card-modal", handleOpenIceCard);
     };
   }, []);
 
@@ -767,6 +772,12 @@ function Navbar() {
       <STARTTriageModal
         isOpen={triageOpen}
         onClose={() => setTriageOpen(false)}
+      />
+
+      {/* Personal Emergency Medical ICE ID Card Modal */}
+      <EmergencyIdCardModal
+        isOpen={iceCardOpen}
+        onClose={() => setIceCardOpen(false)}
       />
     </>
   );
