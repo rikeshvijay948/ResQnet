@@ -193,6 +193,15 @@ export const FacilitiesDirectory: React.FC = () => {
 
           <div className="flex items-center gap-3">
             <button
+              onClick={() => window.dispatchEvent(new CustomEvent("open-evacuation-modal"))}
+              className="px-4 py-2.5 rounded-2xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200/80 active:scale-95 text-xs font-semibold shadow-2xs transition flex items-center gap-2"
+              title="Open safe corridor hazard clearance evacuation navigator"
+            >
+              <span>🧭</span>
+              <span>Evacuation Routes</span>
+            </button>
+
+            <button
               onClick={() => setAddModalOpen(true)}
               className="px-4 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-semibold shadow-md shadow-blue-500/20 transition flex items-center gap-2"
             >

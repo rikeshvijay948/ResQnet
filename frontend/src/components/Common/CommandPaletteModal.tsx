@@ -20,6 +20,7 @@ import {
   FaHeartbeat,
   FaIdCard,
   FaUserFriends,
+  FaRoute,
 } from "react-icons/fa";
 import { soundAlerts } from "../../utils/soundAlerts";
 
@@ -124,6 +125,19 @@ export default function CommandPaletteModal({ isOpen, onClose }: Props) {
         action: () => {
           onClose();
           window.dispatchEvent(new CustomEvent("open-missing-persons-modal"));
+        },
+      },
+      {
+        id: "evacuation-navigator",
+        title: "Evacuation Route & Hazard Clearance Navigator",
+        subtitle: "Verified safe corridors avoiding submerged underpasses, power lines, and damaged bridges",
+        category: "Emergency Action",
+        icon: FaRoute,
+        color: "bg-emerald-600 text-white",
+        badge: "Alt + E",
+        action: () => {
+          onClose();
+          window.dispatchEvent(new CustomEvent("open-evacuation-modal"));
         },
       },
       {

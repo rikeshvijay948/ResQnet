@@ -13,6 +13,7 @@ import STARTTriageModal from "../Common/STARTTriageModal";
 import EmergencyIdCardModal from "../Common/EmergencyIdCardModal";
 import EmergencyWhistleModal from "../Common/EmergencyWhistleModal";
 import MissingPersonsModal from "../Common/MissingPersonsModal";
+import EvacuationRouteModal from "../Common/EvacuationRouteModal";
 import type { Notification } from "../../types";
 import {
   apiGetNotifications,
@@ -65,6 +66,7 @@ function Navbar() {
   const [iceCardOpen, setIceCardOpen] = useState(false);
   const [whistleOpen, setWhistleOpen] = useState(false);
   const [missingPersonsOpen, setMissingPersonsOpen] = useState(false);
+  const [evacuationOpen, setEvacuationOpen] = useState(false);
   const [offlineCount, setOfflineCount] = useState<number>(0);
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -158,6 +160,7 @@ function Navbar() {
     const handleOpenIceCard = () => setIceCardOpen(true);
     const handleOpenWhistle = () => setWhistleOpen(true);
     const handleOpenMissingPersons = () => setMissingPersonsOpen(true);
+    const handleOpenEvacuation = () => setEvacuationOpen(true);
 
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("open-hotlines-modal", handleOpenHotlines);
@@ -169,6 +172,7 @@ function Navbar() {
     window.addEventListener("open-ice-card-modal", handleOpenIceCard);
     window.addEventListener("open-whistle-modal", handleOpenWhistle);
     window.addEventListener("open-missing-persons-modal", handleOpenMissingPersons);
+    window.addEventListener("open-evacuation-modal", handleOpenEvacuation);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("open-hotlines-modal", handleOpenHotlines);
@@ -180,6 +184,7 @@ function Navbar() {
       window.removeEventListener("open-ice-card-modal", handleOpenIceCard);
       window.removeEventListener("open-whistle-modal", handleOpenWhistle);
       window.removeEventListener("open-missing-persons-modal", handleOpenMissingPersons);
+      window.removeEventListener("open-evacuation-modal", handleOpenEvacuation);
     };
   }, []);
 
@@ -800,6 +805,12 @@ function Navbar() {
       <MissingPersonsModal
         isOpen={missingPersonsOpen}
         onClose={() => setMissingPersonsOpen(false)}
+      />
+
+      {/* Evacuation Route & Hazard Clearance Navigator Modal */}
+      <EvacuationRouteModal
+        isOpen={evacuationOpen}
+        onClose={() => setEvacuationOpen(false)}
       />
     </>
   );
