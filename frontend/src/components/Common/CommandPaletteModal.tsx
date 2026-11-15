@@ -19,6 +19,7 @@ import {
   FaMicrophone,
   FaHeartbeat,
   FaIdCard,
+  FaUserFriends,
 } from "react-icons/fa";
 import { soundAlerts } from "../../utils/soundAlerts";
 
@@ -110,6 +111,19 @@ export default function CommandPaletteModal({ isOpen, onClose }: Props) {
         action: () => {
           onClose();
           window.dispatchEvent(new CustomEvent("open-whistle-modal"));
+        },
+      },
+      {
+        id: "missing-persons",
+        title: "Missing Persons & Family Reunification",
+        subtitle: "Community disaster registry to locate separated loved ones and relief camp survivors",
+        category: "Emergency Action",
+        icon: FaUserFriends,
+        color: "bg-indigo-600 text-white",
+        badge: "Alt + F",
+        action: () => {
+          onClose();
+          window.dispatchEvent(new CustomEvent("open-missing-persons-modal"));
         },
       },
       {

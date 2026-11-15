@@ -12,6 +12,7 @@ import VoiceBroadcastModal from "../Common/VoiceBroadcastModal";
 import STARTTriageModal from "../Common/STARTTriageModal";
 import EmergencyIdCardModal from "../Common/EmergencyIdCardModal";
 import EmergencyWhistleModal from "../Common/EmergencyWhistleModal";
+import MissingPersonsModal from "../Common/MissingPersonsModal";
 import type { Notification } from "../../types";
 import {
   apiGetNotifications,
@@ -63,6 +64,7 @@ function Navbar() {
   const [triageOpen, setTriageOpen] = useState(false);
   const [iceCardOpen, setIceCardOpen] = useState(false);
   const [whistleOpen, setWhistleOpen] = useState(false);
+  const [missingPersonsOpen, setMissingPersonsOpen] = useState(false);
   const [offlineCount, setOfflineCount] = useState<number>(0);
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -155,6 +157,7 @@ function Navbar() {
     const handleOpenTriage = () => setTriageOpen(true);
     const handleOpenIceCard = () => setIceCardOpen(true);
     const handleOpenWhistle = () => setWhistleOpen(true);
+    const handleOpenMissingPersons = () => setMissingPersonsOpen(true);
 
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("open-hotlines-modal", handleOpenHotlines);
@@ -165,6 +168,7 @@ function Navbar() {
     window.addEventListener("open-triage-modal", handleOpenTriage);
     window.addEventListener("open-ice-card-modal", handleOpenIceCard);
     window.addEventListener("open-whistle-modal", handleOpenWhistle);
+    window.addEventListener("open-missing-persons-modal", handleOpenMissingPersons);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("open-hotlines-modal", handleOpenHotlines);
@@ -175,6 +179,7 @@ function Navbar() {
       window.removeEventListener("open-triage-modal", handleOpenTriage);
       window.removeEventListener("open-ice-card-modal", handleOpenIceCard);
       window.removeEventListener("open-whistle-modal", handleOpenWhistle);
+      window.removeEventListener("open-missing-persons-modal", handleOpenMissingPersons);
     };
   }, []);
 
@@ -789,6 +794,12 @@ function Navbar() {
       <EmergencyWhistleModal
         isOpen={whistleOpen}
         onClose={() => setWhistleOpen(false)}
+      />
+
+      {/* Missing Persons & Family Reunification Directory Modal */}
+      <MissingPersonsModal
+        isOpen={missingPersonsOpen}
+        onClose={() => setMissingPersonsOpen(false)}
       />
     </>
   );

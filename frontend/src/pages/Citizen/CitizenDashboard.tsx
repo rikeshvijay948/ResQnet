@@ -93,6 +93,16 @@ export const CitizenDashboard: React.FC = () => {
                 <span>🔊</span>
                 <span>Distress Whistle</span>
               </button>
+
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent("open-missing-persons-modal"))}
+                className="py-3 px-4 rounded-2xl bg-indigo-50 hover:bg-indigo-100 text-indigo-900 text-xs font-bold border border-indigo-200/80 transition active:scale-95 flex items-center gap-2 shadow-2xs"
+                title="Community crisis registry to locate separated loved ones and relief camp survivors"
+              >
+                <span>👨‍👩‍👧</span>
+                <span>Missing Persons</span>
+              </button>
               <BatterySentinelBadge />
               <Link
                 to="/report-emergency"
