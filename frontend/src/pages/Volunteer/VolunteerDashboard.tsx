@@ -213,6 +213,17 @@ export const VolunteerDashboard: React.FC = () => {
                 <span>🏷️</span>
                 <span>MCI Triage</span>
               </button>
+
+              {/* Paramedic Trauma & Burn Calculator Trigger */}
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent("open-trauma-modal"))}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50 hover:bg-orange-100 text-orange-800 text-xs font-semibold border border-orange-200/80 transition active:scale-95 shadow-2xs"
+                title="Open Rule of Nines Burn & Glasgow Coma Scale Trauma Diagnostic"
+              >
+                <span>🩺</span>
+                <span>Trauma Calc</span>
+              </button>
             </div>
           </div>
         </div>

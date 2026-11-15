@@ -14,6 +14,7 @@ import EmergencyIdCardModal from "../Common/EmergencyIdCardModal";
 import EmergencyWhistleModal from "../Common/EmergencyWhistleModal";
 import MissingPersonsModal from "../Common/MissingPersonsModal";
 import EvacuationRouteModal from "../Common/EvacuationRouteModal";
+import TraumaDiagnosticModal from "../Common/TraumaDiagnosticModal";
 import type { Notification } from "../../types";
 import {
   apiGetNotifications,
@@ -67,6 +68,7 @@ function Navbar() {
   const [whistleOpen, setWhistleOpen] = useState(false);
   const [missingPersonsOpen, setMissingPersonsOpen] = useState(false);
   const [evacuationOpen, setEvacuationOpen] = useState(false);
+  const [traumaOpen, setTraumaOpen] = useState(false);
   const [offlineCount, setOfflineCount] = useState<number>(0);
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -161,6 +163,7 @@ function Navbar() {
     const handleOpenWhistle = () => setWhistleOpen(true);
     const handleOpenMissingPersons = () => setMissingPersonsOpen(true);
     const handleOpenEvacuation = () => setEvacuationOpen(true);
+    const handleOpenTrauma = () => setTraumaOpen(true);
 
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("open-hotlines-modal", handleOpenHotlines);
@@ -173,6 +176,7 @@ function Navbar() {
     window.addEventListener("open-whistle-modal", handleOpenWhistle);
     window.addEventListener("open-missing-persons-modal", handleOpenMissingPersons);
     window.addEventListener("open-evacuation-modal", handleOpenEvacuation);
+    window.addEventListener("open-trauma-modal", handleOpenTrauma);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("open-hotlines-modal", handleOpenHotlines);
@@ -185,6 +189,7 @@ function Navbar() {
       window.removeEventListener("open-whistle-modal", handleOpenWhistle);
       window.removeEventListener("open-missing-persons-modal", handleOpenMissingPersons);
       window.removeEventListener("open-evacuation-modal", handleOpenEvacuation);
+      window.removeEventListener("open-trauma-modal", handleOpenTrauma);
     };
   }, []);
 
@@ -811,6 +816,12 @@ function Navbar() {
       <EvacuationRouteModal
         isOpen={evacuationOpen}
         onClose={() => setEvacuationOpen(false)}
+      />
+
+      {/* Field Trauma & Burn Diagnostic Calculator Modal */}
+      <TraumaDiagnosticModal
+        isOpen={traumaOpen}
+        onClose={() => setTraumaOpen(false)}
       />
     </>
   );

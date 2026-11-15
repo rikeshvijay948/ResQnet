@@ -21,6 +21,7 @@ import {
   FaIdCard,
   FaUserFriends,
   FaRoute,
+  FaUserMd,
 } from "react-icons/fa";
 import { soundAlerts } from "../../utils/soundAlerts";
 
@@ -138,6 +139,19 @@ export default function CommandPaletteModal({ isOpen, onClose }: Props) {
         action: () => {
           onClose();
           window.dispatchEvent(new CustomEvent("open-evacuation-modal"));
+        },
+      },
+      {
+        id: "trauma-diagnostics",
+        title: "Field Trauma & Burn Calculator",
+        subtitle: "Rule of Nines TBSA%, Parkland IV fluid resuscitation rate & Glasgow Coma Scale (GCS)",
+        category: "Emergency Action",
+        icon: FaUserMd,
+        color: "bg-red-700 text-white",
+        badge: "Alt + D",
+        action: () => {
+          onClose();
+          window.dispatchEvent(new CustomEvent("open-trauma-modal"));
         },
       },
       {
