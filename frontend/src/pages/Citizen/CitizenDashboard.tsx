@@ -83,6 +83,16 @@ export const CitizenDashboard: React.FC = () => {
                 <span>🪪</span>
                 <span>ICE Medical ID</span>
               </button>
+
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent("open-whistle-modal"))}
+                className="py-3 px-4 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold border border-amber-200/80 transition active:scale-95 flex items-center gap-2 shadow-2xs"
+                title="High-penetration acoustic distress whistle for rubble/flood rescue"
+              >
+                <span>🔊</span>
+                <span>Distress Whistle</span>
+              </button>
               <BatterySentinelBadge />
               <Link
                 to="/report-emergency"

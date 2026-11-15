@@ -11,6 +11,7 @@ import TacticalCompassModal from "../Common/TacticalCompassModal";
 import VoiceBroadcastModal from "../Common/VoiceBroadcastModal";
 import STARTTriageModal from "../Common/STARTTriageModal";
 import EmergencyIdCardModal from "../Common/EmergencyIdCardModal";
+import EmergencyWhistleModal from "../Common/EmergencyWhistleModal";
 import type { Notification } from "../../types";
 import {
   apiGetNotifications,
@@ -61,6 +62,7 @@ function Navbar() {
   const [voiceOpen, setVoiceOpen] = useState(false);
   const [triageOpen, setTriageOpen] = useState(false);
   const [iceCardOpen, setIceCardOpen] = useState(false);
+  const [whistleOpen, setWhistleOpen] = useState(false);
   const [offlineCount, setOfflineCount] = useState<number>(0);
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -152,6 +154,7 @@ function Navbar() {
     const handleOpenVoice = () => setVoiceOpen(true);
     const handleOpenTriage = () => setTriageOpen(true);
     const handleOpenIceCard = () => setIceCardOpen(true);
+    const handleOpenWhistle = () => setWhistleOpen(true);
 
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("open-hotlines-modal", handleOpenHotlines);
@@ -161,6 +164,7 @@ function Navbar() {
     window.addEventListener("open-voice-modal", handleOpenVoice);
     window.addEventListener("open-triage-modal", handleOpenTriage);
     window.addEventListener("open-ice-card-modal", handleOpenIceCard);
+    window.addEventListener("open-whistle-modal", handleOpenWhistle);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("open-hotlines-modal", handleOpenHotlines);
@@ -170,6 +174,7 @@ function Navbar() {
       window.removeEventListener("open-voice-modal", handleOpenVoice);
       window.removeEventListener("open-triage-modal", handleOpenTriage);
       window.removeEventListener("open-ice-card-modal", handleOpenIceCard);
+      window.removeEventListener("open-whistle-modal", handleOpenWhistle);
     };
   }, []);
 
@@ -778,6 +783,12 @@ function Navbar() {
       <EmergencyIdCardModal
         isOpen={iceCardOpen}
         onClose={() => setIceCardOpen(false)}
+      />
+
+      {/* Emergency Whistle & Acoustic Sonar Locator Modal */}
+      <EmergencyWhistleModal
+        isOpen={whistleOpen}
+        onClose={() => setWhistleOpen(false)}
       />
     </>
   );

@@ -100,6 +100,19 @@ export default function CommandPaletteModal({ isOpen, onClose }: Props) {
         },
       },
       {
+        id: "emergency-whistle",
+        title: "Emergency Whistle & Acoustic Sonar Beacon",
+        subtitle: "High-penetration 3.1 kHz SAR distress pulse for rubble entrapment and flood localization",
+        category: "Emergency Action",
+        icon: FaVolumeUp,
+        color: "bg-amber-600 text-white",
+        badge: "Alt + W",
+        action: () => {
+          onClose();
+          window.dispatchEvent(new CustomEvent("open-whistle-modal"));
+        },
+      },
+      {
         id: "command-center",
         title: "Command Center Map",
         subtitle: "Live incident geodata, responder triage, and real-time dispatch",
